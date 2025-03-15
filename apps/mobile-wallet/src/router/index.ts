@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 import WelcomePage from "@/views/WelcomePage.vue";
+import CreatePassword from "@/views/CreatePassword.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -10,6 +11,10 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/welcome',
     component: WelcomePage
+  },
+  {
+    path: '/createpass',
+    component: CreatePassword
   }
 ]
 

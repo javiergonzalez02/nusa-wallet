@@ -7,10 +7,14 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <div class="center-container">
-        <h1>Welcome!</h1>
+        <h1>Create your Password!</h1>
         <!-- Password Input Field-->
         <ion-item>
           <ion-input label="Password" label-placement="stacked" placeholder="Enter password"></ion-input>
+        </ion-item>
+        <!-- Password Input Field-->
+        <ion-item>
+          <ion-input label="Repeat Password" label-placement="stacked" placeholder="Repeat password"></ion-input>
         </ion-item>
         <!-- Sing In Button -->
         <ion-button>
@@ -37,7 +41,6 @@ const password = ref('');
   height: 100%;
   padding: 16px;
 }
-
 .center-container h1 {
   margin-bottom: 80px;
 }

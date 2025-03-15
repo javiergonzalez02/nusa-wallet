@@ -8,10 +8,15 @@
     <ion-content :fullscreen="true">
       <div class="center-container">
         <h1>Welcome!</h1>
-        <!-- Password Input Field-->
-        <ion-item>
-          <ion-input label="Password" label-placement="stacked" placeholder="Enter password"></ion-input>
-        </ion-item>
+        <!-- Seed Phrase Card-->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Seed Phrase</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            dynamic glow marble become give assume woman gain fantasy plate hover able
+          </ion-card-content>
+        </ion-card>
         <!-- Sing In Button -->
         <ion-button>
           Enter Wallet

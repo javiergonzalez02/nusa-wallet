@@ -26,10 +26,8 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
 import {IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonInput, IonButton} from '@ionic/vue';
 
-const password = ref('');
 </script>
 
 <style scoped>
@@ -41,14 +39,12 @@ const password = ref('');
   height: 100%;
   padding: 16px;
 }
+
 .center-container h1 {
   margin-bottom: 80px;
 }
 
-.center-container ion-item {
-  margin-bottom: 16px;
-}
-
+.center-container ion-item,
 .center-container ion-button {
   margin-top: 16px;
 }

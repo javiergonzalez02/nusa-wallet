@@ -1,10 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Nusa Wallet</ion-title>
-      </ion-toolbar>
-    </ion-header>
+    <NusaHeader/>
     <ion-content :fullscreen="true">
       <div class="center-container">
         <h1>Confirm Seed Phrase!</h1>
@@ -31,7 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonInput, IonButton, IonList, IonItem, IonLabel } from '@ionic/vue';
+import {IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, IonPage} from '@ionic/vue';
+import NusaHeader from "@/components/NusaHeader.vue";
 </script>
 
 <style scoped>

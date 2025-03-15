@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'mobile-wallet',
+  appId: 'nusa.wallet.mobile',
+  appName: 'Nusa',
   webDir: 'dist'
 };
 

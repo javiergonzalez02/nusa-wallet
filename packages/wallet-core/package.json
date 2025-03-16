@@ -1,0 +1,9 @@
+{
+  "name": "wallet-core",
+  "version": "0.1.0",
+  "main": "useMnemonic.ts",
+  "dependencies": {
+    "ethers": "^6.13.5",
+    "vue": "^3.3.0"
+  }
+}

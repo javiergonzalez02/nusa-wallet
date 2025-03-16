@@ -1,49 +1,32 @@
 <template>
-  <ion-page>
-    <NusaHeader/>
-    <ion-content :fullscreen="true">
-      <div class="center-container">
-        <h1>Confirm Seed Phrase!</h1>
-        <ion-list class="columns">
-          <div class="column">
-            <ion-item v-for="i in 6" :key="i">
-              <ion-label position="stacked">Word {{ i }}</ion-label>
-              <ion-input :placeholder="`Enter word ${i}`"></ion-input>
-            </ion-item>
-          </div>
-          <div class="column">
-            <ion-item v-for="i in 6" :key="i + 6">
-              <ion-label position="stacked">Word {{ i + 6 }}</ion-label>
-              <ion-input :placeholder="`Enter word ${i + 6}`"></ion-input>
-            </ion-item>
-          </div>
-        </ion-list>
-        <ion-button>
-          Enter Wallet
-        </ion-button>
+  <BaseLayout>
+    <h1>Confirm Seed Phrase!</h1>
+    <ion-list class="columns">
+      <div class="column">
+        <ion-item v-for="i in 6" :key="i">
+          <ion-label position="stacked">Word {{ i }}</ion-label>
+          <ion-input :placeholder="`Enter word ${i}`"></ion-input>
+        </ion-item>
       </div>
-    </ion-content>
-  </ion-page>
+      <div class="column">
+        <ion-item v-for="i in 6" :key="i + 6">
+          <ion-label position="stacked">Word {{ i + 6 }}</ion-label>
+          <ion-input :placeholder="`Enter word ${i + 6}`"></ion-input>
+        </ion-item>
+      </div>
+    </ion-list>
+    <ion-button>
+      Enter Wallet
+    </ion-button>
+  </BaseLayout>
 </template>
 
 <script setup lang="ts">
-import {IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, IonPage} from '@ionic/vue';
-import NusaHeader from "@/components/NusaHeader.vue";
+import {IonButton, IonInput, IonItem, IonLabel, IonList} from '@ionic/vue';
+import BaseLayout from '../layouts/BaseLayout.vue';
 </script>
 
 <style scoped>
-.center-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 16px;
-}
-
-.center-container h1 {
-  margin-bottom: 24px;
-}
 
 .columns {
   display: flex;
@@ -56,8 +39,4 @@ import NusaHeader from "@/components/NusaHeader.vue";
   flex-direction: column;
 }
 
-ion-item,
-ion-button {
-  margin-top: 16px;
-}
 </style>

@@ -13,22 +13,27 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/welcome',
+    name: 'welcome',
     component: WelcomePage
   },
   {
     path: '/createpass',
+    name: 'createpass',
     component: CreatePassword
   },
   {
     path: '/createseed',
+    name: 'createseed',
     component: CreateSeedPhrase
   },
   {
     path: '/confirmseed',
+    name: 'confirmseed',
     component: ConfirmSeedPhrase
   },
   {
     path: '/mainview',
+    name: 'mainview',
     component: MainView
   }
 ]

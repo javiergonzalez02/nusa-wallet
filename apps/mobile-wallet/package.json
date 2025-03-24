@@ -12,6 +12,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@aparajita/capacitor-secure-storage": "^6.0.1",
     "@capacitor/android": "7.0.1",
     "@capacitor/app": "7.0.0",
     "@capacitor/core": "7.0.1",
@@ -21,7 +22,9 @@
     "@capacitor/status-bar": "7.0.0",
     "@ionic/vue": "^8.0.0",
     "@ionic/vue-router": "^8.0.0",
+    "capacitor-secure-storage-plugin": "^0.11.0",
     "ionicons": "^7.0.0",
+    "pinia": "^3.0.1",
     "vue": "^3.3.0",
     "vue-router": "^4.2.0"
   },

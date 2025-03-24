@@ -39,38 +39,34 @@ import { useRouter } from 'vue-router';
 import { getPassword } from '@/utils/secureStorage/password';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
 
-const router = useRouter ();
-const password = ref ('');
-const errorMessage = ref ('');
-const isLoading = ref (true);
-const requiresPassword = ref (false);
+const router = useRouter();
+const password = ref('');
+const errorMessage = ref('');
+const isLoading = ref(true);
+const requiresPassword = ref(false);
 
-onMounted(async () => {
+onMounted(async() => {
   // Check if a seed phrase is stored.
   const seed = await getSeedPhrase();
-  if (seed) {
-    // If a seed phrase exists, show the login form.
-    requiresPassword.value = true;
-  } else {
-    // If no seed phrase, do not redirect; show the Create Wallet button.
-    requiresPassword.value = false;
-  }
+  // Convert the seed value to a boolean using double negation (!!)
+  // This means: if a seed phrase exists, then a password is required.
+  requiresPassword.value = !!seed;
   isLoading.value = false;
 });
 
-const login = async () => {
+const login = async() => {
   // Retrieve the stored password.
-  const storedPassword = await getPassword ();
+  const storedPassword = await getPassword();
   if (password.value === storedPassword) {
     // If the password is correct, navigate to the main view.
-    await router.push ({name: 'mainview'});
+    await router.push({ name: 'mainview' });
   } else {
     errorMessage.value = 'Incorrect password. Please try again.';
   }
 };
 
-const createWallet = async () => {
+const createWallet = async() => {
   // Navigate to the Create Password view so that a new wallet can be created.
-  await router.push ({name: 'createpass'});
+  await router.push({ name: 'createpass' });
 };
 </script>

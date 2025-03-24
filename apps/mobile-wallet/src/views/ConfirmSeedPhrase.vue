@@ -33,7 +33,7 @@ import { ref, computed } from 'vue';
 import { IonButton, IonInput, IonItem, IonLabel, IonList } from '@ionic/vue';
 import BaseLayout from '../layouts/BaseLayout.vue';
 import { useSeedStore } from '@/stores/seedStore';
-import { setSeedPhrase } from '@/utils/secureStorage';
+import { setSeedPhrase } from '@/utils/secureStorage/seed';
 
 const seedStore = useSeedStore();
 const originalSeed = computed(() => seedStore.mnemonic);

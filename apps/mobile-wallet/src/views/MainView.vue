@@ -15,6 +15,7 @@
           </ion-card-header>
           <ion-card-content>
             <p>Your Account: {{ accountAddress }}</p>
+            <p>Balance: {{ accountBalance }} SYS</p>
           </ion-card-content>
         </ion-card>
         <!-- Card to display the private key -->
@@ -68,7 +69,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
-import { getFirstAccountAndPrivateKeyFromMnemonic } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
+import { getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle,
   IonSegment, IonSegmentButton, IonLabel, IonContent, IonList, IonItem
@@ -77,25 +78,29 @@ import {
 // Use a ref to track the active segment; defaulting to 'activity'
 const segment = ref('activity');
 
-// Refs to store the derived address and private key
+// Refs to store account details and balance
 const accountAddress = ref('Loading...');
 const accountPrivateKey = ref('Loading...');
+const accountBalance = ref('Loading...');
 
 onMounted(async () => {
   try {
     const mnemonic = await getSeedPhrase();
     if (mnemonic) {
-      const { address, privateKey } = getFirstAccountAndPrivateKeyFromMnemonic(mnemonic);
+      const { address, privateKey, balance } = await getAccountDetails(mnemonic);
       accountAddress.value = address;
       accountPrivateKey.value = privateKey;
+      accountBalance.value = balance !== null ? balance : 'Error fetching balance';
     } else {
       accountAddress.value = 'Mnemonic not found';
       accountPrivateKey.value = 'Mnemonic not found';
+      accountBalance.value = 'Mnemonic not found';
     }
   } catch (error) {
     console.error('Error fetching seed phrase:', error);
     accountAddress.value = 'Error fetching account';
     accountPrivateKey.value = 'Error fetching private key';
+    accountBalance.value = 'Error fetching balance';
   }
 });
 </script>

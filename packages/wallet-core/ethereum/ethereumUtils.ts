@@ -1,14 +1,15 @@
 import { ethers } from 'ethers';
 
 /**
- * Derives the first account address from a given mnemonic phrase.
+ * Derives the first account's address and private key from a given mnemonic phrase.
  *
  * @param mnemonic - A string containing the mnemonic phrase used to generate the wallet.
- * @returns The Ethereum address associated with the first account derived from the mnemonic.
+ * @returns An object containing the Ethereum address and private key associated with the first account.
  */
-
-export function getFirstAccountFromMnemonic(mnemonic: string): string {
-  // Create an HDNodeWallet from the mnemonic
+export function getFirstAccountAndPrivateKeyFromMnemonic(mnemonic: string): { address: string; privateKey: string } {
   const hdNodeWallet = ethers.HDNodeWallet.fromPhrase(mnemonic);
-   return hdNodeWallet.address;
+  return {
+    address: hdNodeWallet.address,
+    privateKey: hdNodeWallet.privateKey,
+  };
 }

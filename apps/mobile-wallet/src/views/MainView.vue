@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
-import { getFirstAccountFromMnemonic } from '../../../../packages/wallet-core';
+import { getFirstAccountFromMnemonic } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle,
   IonSegment, IonSegmentButton, IonLabel, IonContent, IonList, IonItem

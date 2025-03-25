@@ -17,9 +17,3 @@ export function createWalletMnemonic(): string {
   // Return the mnemonic phrase.
   return wallet.mnemonic.phrase;
 }
-
-export function getFirstAccountFromMnemonic(mnemonic: string): string {
-  // Create an HDNodeWallet from the mnemonic
-  const hdNodeWallet = ethers.HDNodeWallet.fromPhrase(mnemonic);
-   return hdNodeWallet.address;
-}

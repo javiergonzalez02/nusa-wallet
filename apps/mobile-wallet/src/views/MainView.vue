@@ -1,7 +1,8 @@
 <template>
   <ion-page>
     <ion-header>
-      <!-- Primary toolbar with title and settings button -->
+      <!-- Primary toolbar with title -->
+      <!-- TODO Settings View and button-->
       <ion-toolbar>
         <ion-title>Dashboard</ion-title>
       </ion-toolbar>
@@ -14,6 +15,16 @@
           </ion-card-header>
           <ion-card-content>
             <p>Your Account: {{ accountAddress }}</p>
+          </ion-card-content>
+        </ion-card>
+        <!-- Card to display the private key -->
+        <!-- TODO Hide it in Settings view and ask for password to retrieve it-->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Private Key</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p>{{ accountPrivateKey }}</p>
           </ion-card-content>
         </ion-card>
         <ion-segment v-model="segment" color="primary">
@@ -57,7 +68,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
-import { getFirstAccountFromMnemonic } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
+import { getFirstAccountAndPrivateKeyFromMnemonic } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle,
   IonSegment, IonSegmentButton, IonLabel, IonContent, IonList, IonItem
@@ -66,19 +77,25 @@ import {
 // Use a ref to track the active segment; defaulting to 'activity'
 const segment = ref('activity');
 
-// Store the derived address in a ref to display it
+// Refs to store the derived address and private key
 const accountAddress = ref('Loading...');
+const accountPrivateKey = ref('Loading...');
 
 onMounted(async () => {
   try {
     const mnemonic = await getSeedPhrase();
     if (mnemonic) {
-      accountAddress.value = getFirstAccountFromMnemonic(mnemonic);
+      const { address, privateKey } = getFirstAccountAndPrivateKeyFromMnemonic(mnemonic);
+      accountAddress.value = address;
+      accountPrivateKey.value = privateKey;
     } else {
       accountAddress.value = 'Mnemonic not found';
+      accountPrivateKey.value = 'Mnemonic not found';
     }
   } catch (error) {
     console.error('Error fetching seed phrase:', error);
+    accountAddress.value = 'Error fetching account';
+    accountPrivateKey.value = 'Error fetching private key';
   }
 });
 </script>

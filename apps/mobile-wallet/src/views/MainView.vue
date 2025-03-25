@@ -13,7 +13,7 @@
             <ion-card-title>Account Info</ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            <p>Your Account: Main Account</p>
+            <p>Your Account: {{ accountAddress }}</p>
           </ion-card-content>
         </ion-card>
         <ion-segment v-model="segment" color="primary">
@@ -55,7 +55,9 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
+import { ref, onMounted } from 'vue';
+import { getSeedPhrase } from '@/utils/secureStorage/seed';
+import { getFirstAccountFromMnemonic } from '../../../../packages/wallet-core';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle,
   IonSegment, IonSegmentButton, IonLabel, IonContent, IonList, IonItem
@@ -63,6 +65,22 @@ import {
 
 // Use a ref to track the active segment; defaulting to 'activity'
 const segment = ref('activity');
+
+// Store the derived address in a ref to display it
+const accountAddress = ref('Loading...');
+
+onMounted(async () => {
+  try {
+    const mnemonic = await getSeedPhrase();
+    if (mnemonic) {
+      accountAddress.value = getFirstAccountFromMnemonic(mnemonic);
+    } else {
+      accountAddress.value = 'Mnemonic not found';
+    }
+  } catch (error) {
+    console.error('Error fetching seed phrase:', error);
+  }
+});
 </script>
 
 <style scoped>

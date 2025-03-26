@@ -1,42 +1,23 @@
-import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
+import { StorageKey, setItem, getItem, removeItem } from './secureStorage';
 
 /**
- * Save the seed phrase to the device's secure storage.
- *
- * @param seed The mnemonic seed phrase.
+ * Stores mnemonic seed phrase in secure storage
+ * @param seed - BIP-39 compliant seed phrase
+ * @throws {Error} When storage fails
  */
-export async function setSeedPhrase(seed: string): Promise<void> {
-  try {
-    await SecureStoragePlugin.set({ key: 'mnemonic', value: seed });
-  } catch (error) {
-    console.error('Error saving seed phrase:', error);
-    throw error;
-  }
-}
+export const setSeedPhrase = (seed: string) => 
+  setItem(StorageKey.Mnemonic, seed);
 
 /**
- * Retrieve the seed phrase from secure storage.
- *
- * @returns The stored seed phrase or null if not found.
+ * Retrieves mnemonic seed phrase from secure storage
+ * @returns Seed phrase or null if not found
  */
-export async function getSeedPhrase(): Promise<string | null> {
-  try {
-    const result = await SecureStoragePlugin.get({ key: 'mnemonic' });
-    return result.value;
-  } catch (error) {
-    console.error('Error retrieving seed phrase:', error);
-    return null;
-  }
-}
+export const getSeedPhrase = () => 
+  getItem(StorageKey.Mnemonic);
 
 /**
- * Remove the seed phrase from secure storage.
+ * Removes mnemonic seed phrase from secure storage
+ * @throws {Error} When removal fails
  */
-export async function removeSeedPhrase(): Promise<void> {
-  try {
-    await SecureStoragePlugin.remove({ key: 'mnemonic' });
-  } catch (error) {
-    console.error('Error removing seed phrase:', error);
-    throw error;
-  }
-}
+export const removeSeedPhrase = () => 
+  removeItem(StorageKey.Mnemonic);

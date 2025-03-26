@@ -1,42 +1,23 @@
-import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
+import { StorageKey, setItem, getItem, removeItem } from './secureStorage';
 
 /**
- * Save the wallet password to secure storage.
- *
- * @param password The wallet password.
+ * Stores wallet password in secure storage
+ * @param password - Encryption password for the wallet
+ * @throws {Error} When storage fails
  */
-export async function setPassword(password: string): Promise<void> {
-  try {
-    await SecureStoragePlugin.set({ key: 'walletPassword', value: password });
-  } catch (error) {
-    console.error('Error saving wallet password:', error);
-    throw error;
-  }
-}
+export const setPassword = (password: string) => 
+  setItem(StorageKey.WalletPassword, password);
 
 /**
- * Retrieve the wallet password from secure storage.
- *
- * @returns The stored password or null if not found.
+ * Retrieves wallet password from secure storage
+ * @returns Password string or null if not found
  */
-export async function getPassword(): Promise<string | null> {
-  try {
-    const result = await SecureStoragePlugin.get({ key: 'walletPassword' });
-    return result.value;
-  } catch (error) {
-    console.error('Error retrieving wallet password:', error);
-    return null;
-  }
-}
+export const getPassword = () => 
+  getItem(StorageKey.WalletPassword);
 
 /**
- * Remove the wallet password from secure storage.
+ * Removes wallet password from secure storage
+ * @throws {Error} When removal fails
  */
-export async function removePassword(): Promise<void> {
-  try {
-    await SecureStoragePlugin.remove({ key: 'walletPassword' });
-  } catch (error) {
-    console.error('Error removing wallet password:', error);
-    throw error;
-  }
-}
+export const removePassword = () => 
+  removeItem(StorageKey.WalletPassword);

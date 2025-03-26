@@ -2,12 +2,13 @@
   <ion-page>
     <ion-header>
       <!-- Primary toolbar with title -->
-      <!-- TODO Settings View and button-->
+      <!-- TODO Settings View and button -->
       <ion-toolbar>
         <ion-title>Dashboard</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
+      <SendAssetsModal :privateKey="accountPrivateKey" />
       <div class="dashboard-container">
         <ion-card>
           <ion-card-header>
@@ -28,6 +29,8 @@
             <p>{{ accountPrivateKey }}</p>
           </ion-card-content>
         </ion-card>
+        <!-- Open SendAssetsModal -->
+        <ion-button id="open-modal" expand="block">Send</ion-button>
         <ion-segment v-model="segment" color="primary">
           <ion-segment-button value="activity">
             <ion-label>Activity</ion-label>
@@ -71,9 +74,18 @@ import { ref, onMounted } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
 import { getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle,
-  IonSegment, IonSegmentButton, IonLabel, IonContent, IonList, IonItem
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonSegment,
+  IonSegmentButton,
+  IonLabel,
+  IonContent,
+  IonList,
+  IonItem
 } from '@ionic/vue';
+import SendAssetsModal from "@/components/SendAssetsModal.vue";
 
 // Use a ref to track the active segment; defaulting to 'activity'
 const segment = ref('activity');
@@ -83,7 +95,7 @@ const accountAddress = ref('Loading...');
 const accountPrivateKey = ref('Loading...');
 const accountBalance = ref('Loading...');
 
-onMounted(async () => {
+onMounted(async() => {
   try {
     const mnemonic = await getSeedPhrase();
     if (mnemonic) {

@@ -5,6 +5,36 @@ const sysRpcUrl = 'https://rpc.tanenbaum.io';
 const sysProvider = new ethers.JsonRpcProvider(sysRpcUrl);
 
 /**
+ * Derives the account's address from a mnemonic.
+ * @param mnemonic - The mnemonic phrase used to generate the wallet.
+ * @returns The account address.
+ */
+export function getAddressFromMnemonic(mnemonic: string): string {
+  const hdNodeWallet = ethers.HDNodeWallet.fromPhrase(mnemonic);
+  return hdNodeWallet.address;
+}
+
+/**
+ * Derives the account's private key from a mnemonic.
+ * @param mnemonic - The mnemonic phrase used to generate the wallet.
+ * @returns The private key.
+ */
+export function getPrivateKeyFromMnemonic(mnemonic: string): string {
+  const hdNodeWallet = ethers.HDNodeWallet.fromPhrase(mnemonic);
+  return hdNodeWallet.privateKey;
+}
+
+/**
+ * Fetches the balance (in ETH) of a given address.
+ * @param address - The account address to fetch the balance for.
+ * @returns The balance in ETH as a string.
+ */
+export async function getBalanceForAddress(address: string): Promise<string> {
+  const balanceBN = await sysProvider.getBalance(address);
+  return ethers.formatEther(balanceBN);
+}
+
+/**
  * Derives the account's address and private key from a mnemonic,
  * creates a wallet instance, and fetches its balance.
  *
@@ -17,17 +47,9 @@ export async function getAccountDetails(mnemonic: string): Promise<{
   balance: string | null
 }> {
   try {
-    // Derive the first account's address and private key
-    const hdNodeWallet = ethers.HDNodeWallet.fromPhrase(mnemonic);
-    const address = hdNodeWallet.address;
-    const privateKey = hdNodeWallet.privateKey;
-
-    // Create a wallet instance with the provided provider
-    const wallet = new ethers.Wallet(privateKey, sysProvider);
-
-    // Fetch the balance (in wei) and format it to ETH
-    const balanceBN = await wallet.provider.getBalance(address);
-    const balance = ethers.formatEther(balanceBN);
+    const address = getAddressFromMnemonic(mnemonic);
+    const privateKey = getPrivateKeyFromMnemonic(mnemonic);
+    const balance = await getBalanceForAddress(address);
 
     return { address, privateKey, balance };
   } catch (error) {

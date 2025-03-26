@@ -19,5 +19,15 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom'
+  },
+  server: {
+    fs: {
+      allow: [
+        // Explicitly allow the mobile-wallet project root
+        path.resolve(__dirname),
+        // Allow the wallet-core package from the monorepo
+        path.resolve(__dirname, '../../packages/wallet-core')
+      ]
+    }
   }
 })

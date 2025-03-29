@@ -1,44 +1,51 @@
 <template>
   <!-- Ionic Modal component to send Assets -->
-  <ion-modal ref="modal" trigger="open-modal" class="custom-modal">
-    <ion-header>
-      <ion-toolbar>
-        <!-- Cancel button -->
-        <ion-buttons slot="start">
-          <ion-button @click="dismiss()">Close</ion-button>
-        </ion-buttons>
-        <ion-title>Send SYS</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <ion-list>
-        <!-- Input for the recipient address -->
-        <ion-item>
-          <ion-label position="stacked">Recipient Address</ion-label>
-          <ion-input v-model="recipientAddress" placeholder="0x..."></ion-input>
-        </ion-item>
-        <!-- Input for the transaction amount -->
-        <ion-item>
-          <ion-label position="stacked">Amount</ion-label>
-          <ion-input v-model="amount" placeholder="Enter amount"></ion-input>
-          </ion-item>
-      </ion-list>
-      <!-- Button to trigger sending the transaction -->
-      <ion-button expand="full" @click="handleTransaction" :disabled="loading">
-        <ion-spinner v-if="loading" slot="start"></ion-spinner>
-        Send SYS
-      </ion-button>
-    </ion-content>
-  </ion-modal>
+  <ion-header>
+    <ion-toolbar>
+      <!-- Cancel button -->
+      <ion-buttons slot="start">
+        <ion-button @click="dismiss()">Close</ion-button>
+      </ion-buttons>
+      <ion-title>Send SYS</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content class="ion-padding">
+    <ion-list>
+      <!-- Input for the recipient address -->
+      <ion-item>
+        <ion-label position="stacked">Recipient Address</ion-label>
+        <ion-input v-model="recipientAddress" placeholder="0x..."></ion-input>
+      </ion-item>
+      <!-- Input for the transaction amount -->
+      <ion-item>
+        <ion-label position="stacked">Amount</ion-label>
+        <ion-input v-model="amount" placeholder="Enter amount"></ion-input>
+      </ion-item>
+    </ion-list>
+    <!-- Button to trigger sending the transaction -->
+    <ion-button expand="full" @click="handleTransaction" :disabled="loading">
+      <ion-spinner v-if="loading" slot="start"></ion-spinner>
+      Send SYS
+    </ion-button>
+  </ion-content>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { sendTransaction } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
-import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonTitle, IonToolbar, IonInput } from '@ionic/vue';
+import {
+  IonContent,
+  IonHeader,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonTitle,
+  IonToolbar,
+  IonInput,
+  modalController
+} from '@ionic/vue';
 
 // Ref variables
-const modal = ref();                  // Reference to the modal component
 const recipientAddress = ref();       // User input for recipient's address
 const amount = ref();                 // User input for the amount to send
 const loading = ref(false);           // Loading state during transaction process
@@ -50,7 +57,7 @@ const props = defineProps<{
 
 // Dismiss modal
 function dismiss() {
-  modal.value.dismiss(null, 'dismiss');
+  modalController.dismiss();
 }
 
 // Handles the transaction process
@@ -87,13 +94,3 @@ async function handleTransaction() {
   }
 }
 </script>
-
-<style scoped>
-.custom-modal {
-  width: 90%;
-  height: 80%;
-  max-width: 600px;
-  margin: auto;
-  top: 10%;
-}
-</style>

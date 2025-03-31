@@ -53,7 +53,7 @@ const confirmSeed = async() => {
     try {
       await setSeedPhrase(expectedSeed);
       alert('Seed phrase saved successfully!');
-      await router.push({ name: 'mainview' });
+      await router.push({ name: 'dashboard' });
     } catch (error) {
       errorMessage.value = 'Error saving seed phrase to secure storage.';
       console.error('Error:', error);

@@ -4,7 +4,9 @@ import WelcomePage from "@/views/WelcomePage.vue";
 import CreatePassword from "@/views/CreatePassword.vue";
 import CreateSeedPhrase from "@/views/CreateSeedPhrase.vue";
 import ConfirmSeedPhrase from "@/views/ConfirmSeedPhrase.vue";
-import MainView from "@/views/MainView.vue";
+import Settings from "@/views/Settings.vue";
+import Tabs from "@/views/Tabs.vue";
+import Dashboard from "@/views/Dashboard.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -32,9 +34,24 @@ const routes: Array<RouteRecordRaw> = [
     component: ConfirmSeedPhrase
   },
   {
-    path: '/mainview',
-    name: 'mainview',
-    component: MainView
+    path: '/tabs',
+    component: Tabs,
+    children: [
+      {
+        path: '',
+        redirect: 'dashboard'
+      },
+      {
+        path: 'dashboard',
+        name: 'dashboard',
+        component: Dashboard
+      },
+      {
+        path: 'settings',
+        name: 'settings',
+        component: Settings
+      }
+    ]
   }
 ]
 

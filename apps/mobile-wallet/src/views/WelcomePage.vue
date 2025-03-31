@@ -59,7 +59,7 @@ const login = async() => {
   const storedPassword = await getPassword();
   if (password.value === storedPassword) {
     // If the password is correct, navigate to the main view.
-    await router.push({ name: 'mainview' });
+    await router.push({ name: 'dashboard' });
   } else {
     errorMessage.value = 'Incorrect password. Please try again.';
   }

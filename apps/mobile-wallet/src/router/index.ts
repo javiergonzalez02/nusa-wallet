@@ -34,12 +34,12 @@ const routes: Array<RouteRecordRaw> = [
     component: ConfirmSeedPhrase
   },
   {
-    path: '/tabs',
+    path: '/tabs/',
     component: Tabs,
     children: [
       {
         path: '',
-        redirect: 'dashboard'
+        redirect: '/tabs/dashboard'
       },
       {
         path: 'dashboard',

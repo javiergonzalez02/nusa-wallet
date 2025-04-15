@@ -32,8 +32,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { IonButton, IonItem, IonInput } from '@ionic/vue';
+import { ref } from 'vue';
+import { IonButton, IonItem, IonInput, onIonViewWillEnter } from '@ionic/vue';
 import BaseLayout from '../layouts/BaseLayout.vue';
 import { useRouter } from 'vue-router';
 import { getPassword } from '@/utils/secureStorage/password';
@@ -45,7 +45,7 @@ const errorMessage = ref('');
 const isLoading = ref(true);
 const requiresPassword = ref(false);
 
-onMounted(async() => {
+onIonViewWillEnter(async() => {
   // Check if a seed phrase is stored.
   const seed = await getSeedPhrase();
   // Convert the seed value to a boolean using double negation (!!)

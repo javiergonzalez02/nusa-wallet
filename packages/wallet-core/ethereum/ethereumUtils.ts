@@ -30,8 +30,12 @@ export function getPrivateKeyFromMnemonic(mnemonic: string): string {
  * @returns The balance in ETH as a string.
  */
 export async function getBalanceForAddress(address: string): Promise<string> {
-  const balanceBN = await sysProvider.getBalance(address);
-  return ethers.formatEther(balanceBN);
+  try {
+    const balanceBN = await sysProvider.getBalance(address);
+    return ethers.formatEther(balanceBN);
+  } catch (error) {
+    return 'Error fetching balance';
+  }
 }
 
 /**

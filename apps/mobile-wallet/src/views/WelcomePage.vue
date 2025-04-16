@@ -38,6 +38,7 @@ import BaseLayout from '../layouts/BaseLayout.vue';
 import { useRouter } from 'vue-router';
 import { getPassword } from '@/utils/secureStorage/password';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
+import { usePreventBack } from "@/composables/usePreventBack";
 
 const router = useRouter();
 const password = ref('');
@@ -69,4 +70,7 @@ const createWallet = async() => {
   // Navigate to the Create Password view so that a new wallet can be created.
   await router.push({ name: 'createpass' });
 };
+
+// Prevent backwards navigation
+usePreventBack();
 </script>

@@ -31,18 +31,24 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
-import {IonButton, IonItem, IonInput} from '@ionic/vue';
+import { ref } from 'vue';
+import { IonButton, IonItem, IonInput } from '@ionic/vue';
 import BaseLayout from '../layouts/BaseLayout.vue';
-import {useRouter} from 'vue-router';
-import {setPassword} from '@/utils/secureStorage/password';
+import { useRouter } from 'vue-router';
+import { setPassword } from '@/utils/secureStorage/password';
 
 const router = useRouter();
 const password = ref('');
 const repeatPassword = ref('');
 const errorMessage = ref('');
 
-const enterWallet = async () => {
+const enterWallet = async() => {
+  // Validate the password's length
+  if (password.value.length < 6) {
+    errorMessage.value = 'Password must be at least 6 characters long.';
+    return;
+  }
+
   // Validate that both passwords match
   if (password.value !== repeatPassword.value) {
     errorMessage.value = 'Passwords do not match.';
@@ -52,7 +58,7 @@ const enterWallet = async () => {
   try {
     // Save the password securely
     await setPassword(password.value);
-    await router.push({name: 'createseed'});
+    await router.push({ name: 'createseed' });
   } catch (error) {
     errorMessage.value = 'Error saving password.';
     console.error('Error:', error);

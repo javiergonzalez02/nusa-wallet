@@ -1,18 +1,26 @@
 <template>
   <BaseLayout>
     <ion-content>
-      <!-- Define button with unique ID to trigger deletion alert -->
-      <ion-button id="confirm-delete">
-        Delete Seed Phrase
-      </ion-button>
-      <!-- Define button to retrieve Mnemonic Phrase -->
-      <ion-button @click="getMnemonic">
-        Get Seed
-      </ion-button>
-      <!-- Invoke logout handler on click -->
-      <ion-button @click="logOut">
-        Log out
-      </ion-button>
+      <ion-list :inset="true" lines="none">
+        <ion-item>
+          <!-- Define button with unique ID to trigger deletion alert -->
+          <ion-button id="confirm-delete">
+            Delete Seed Phrase
+          </ion-button>
+        </ion-item>
+        <ion-item>
+          <!-- Define button to retrieve Mnemonic Phrase -->
+          <ion-button @click="getMnemonic">
+            Get Seed
+          </ion-button>
+        </ion-item>
+        <ion-item>
+          <!-- Invoke logout handler on click -->
+          <ion-button @click="logOut">
+            Log out
+          </ion-button>
+        </ion-item>
+      </ion-list>
       <!-- Configure alert triggered by the 'confirm-delete' button to confirm deletion -->
       <ion-alert
           trigger="confirm-delete"
@@ -25,7 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import { IonAlert, IonButton, IonContent } from '@ionic/vue';
+import { IonAlert, IonButton, IonContent, IonList, IonItem } from '@ionic/vue';
 import { getSeedPhrase, removeSeedPhrase } from '@/utils/secureStorage/seed';
 import { useRouter } from "vue-router";
 import BaseLayout from "@/layouts/BaseLayout.vue";

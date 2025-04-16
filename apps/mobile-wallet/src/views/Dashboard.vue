@@ -11,16 +11,6 @@
             <p>Balance: {{ accountBalance }} SYS</p>
           </ion-card-content>
         </ion-card>
-        <!-- Card to display the private key -->
-        <!-- TODO Hide it in Settings view and ask for password to retrieve it-->
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Private Key</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <p>{{ accountPrivateKey }}</p>
-          </ion-card-content>
-        </ion-card>
         <!-- Open SendAssetsModal -->
         <ion-button id="open-modal" expand="block" @click="openSendModal">Send</ion-button>
         <ion-segment v-model="segment" color="primary">

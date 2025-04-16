@@ -1,10 +1,5 @@
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Settings</ion-title>
-      </ion-toolbar>
-    </ion-header>
+  <BaseLayout>
     <ion-content>
       <!-- Define button with unique ID to trigger deletion alert -->
       <ion-button id="confirm-delete">
@@ -26,13 +21,14 @@
           :buttons="alertButtons"
       ></ion-alert>
     </ion-content>
-  </ion-page>
+  </BaseLayout>
 </template>
 
 <script lang="ts" setup>
-import { IonAlert, IonButton, IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+import { IonAlert, IonButton, IonContent } from '@ionic/vue';
 import { getSeedPhrase, removeSeedPhrase } from '@/utils/secureStorage/seed';
 import { useRouter } from "vue-router";
+import BaseLayout from "@/layouts/BaseLayout.vue";
 
 const router = useRouter();
 

@@ -1,12 +1,5 @@
 <template>
-  <ion-page>
-    <ion-header>
-      <!-- Primary toolbar with title -->
-      <!-- TODO Settings View and button -->
-      <ion-toolbar>
-        <ion-title>Dashboard</ion-title>
-      </ion-toolbar>
-    </ion-header>
+  <BaseLayout>
     <ion-content :fullscreen="true">
       <div class="dashboard-container">
         <ion-card>
@@ -65,27 +58,16 @@
         </template>
       </div>
     </ion-content>
-  </ion-page>
+  </BaseLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
 import { getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonSegment,
-  IonSegmentButton,
-  IonLabel,
-  IonContent,
-  IonList,
-  IonItem,
-  modalController
-} from '@ionic/vue';
+import { IonContent, IonItem, IonLabel, IonList, IonSegment, IonSegmentButton, modalController } from '@ionic/vue';
 import SendAssetsModal from "@/components/SendAssetsModal.vue";
+import BaseLayout from "@/layouts/BaseLayout.vue";
 
 // Use a ref to track the active segment; defaulting to 'activity'
 const segment = ref('activity');

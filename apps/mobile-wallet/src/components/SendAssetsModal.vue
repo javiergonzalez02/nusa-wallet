@@ -2,11 +2,11 @@
   <!-- Ionic Modal component to send Assets -->
   <ion-header>
     <ion-toolbar>
+      <ion-title>Send SYS</ion-title>
       <!-- Cancel button -->
-      <ion-buttons slot="start">
+      <ion-buttons slot="end">
         <ion-button @click="dismiss()">Close</ion-button>
       </ion-buttons>
-      <ion-title>Send SYS</ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content class="ion-padding">

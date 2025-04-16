@@ -3,26 +3,26 @@
     <div v-if="isLoading">
       <p>Loading...</p>
     </div>
-    <div v-else>
-      <h1>Welcome!</h1>
+    <div v-else class="login-wrapper">
       <!-- Show login if a seed exists -->
       <div v-if="requiresPassword">
-        <ion-item>
-          <ion-input
-              v-model="password"
-              type="password"
-              label="Password"
-              label-placement="stacked"
-              placeholder="Enter password"
-          ></ion-input>
-        </ion-item>
-        <ion-button @click="login">
+        <h1>Welcome Back!</h1>
+        <ion-input
+            v-model="password"
+            type="password"
+            label="Password"
+            label-placement="floating"
+            helper-text="Enter your password"
+            fill="solid"
+        />
+        <ion-button expand="block" @click="login">
           Enter Wallet
         </ion-button>
         <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
       </div>
       <!-- Otherwise, show the Create Wallet button -->
       <div v-else>
+        <h1>Welcome!</h1>
         <ion-button @click="createWallet">
           Create Wallet
         </ion-button>
@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { IonButton, IonItem, IonInput, onIonViewWillEnter } from '@ionic/vue';
+import { IonButton, IonInput, onIonViewWillEnter } from '@ionic/vue';
 import BaseLayout from '../layouts/BaseLayout.vue';
 import { useRouter } from 'vue-router';
 import { getPassword } from '@/utils/secureStorage/password';
@@ -74,3 +74,12 @@ const createWallet = async() => {
 // Prevent backwards navigation
 usePreventBack();
 </script>
+
+<style scoped>
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+</style>

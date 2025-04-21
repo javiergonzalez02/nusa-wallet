@@ -11,9 +11,6 @@
       </ion-card-content>
     </ion-card>
     <!-- Buttons -->
-    <ion-button @click="generateNewMnemonic">
-      Generate New Seed Phrase
-    </ion-button>
     <ion-button @click="goToConfirm">
       Confirm Seed Phrase
     </ion-button>
@@ -21,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import BaseLayout from '../layouts/BaseLayout.vue';
@@ -33,9 +30,10 @@ const seedStore = useSeedStore();
 // Use a computed property to keep the mnemonic reactive.
 const mnemonic = computed(() => seedStore.mnemonic);
 
-const generateNewMnemonic = () => {
+// generate mnemonic on mount
+onMounted(() => {
   seedStore.generateMnemonic();
-};
+});
 
 const goToConfirm = () => {
   router.push({ name: 'confirmseed' });

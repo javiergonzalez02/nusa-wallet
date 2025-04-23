@@ -3,6 +3,20 @@
     <ion-content>
       <ion-list :inset="true" lines="none">
         <ion-item>
+          <ion-select
+              v-model="network"
+              @ionChange="onNetworkChange"
+              label="Network"
+              placeholder="Select network"
+              label-placement="floating"
+          >
+            <ion-select-option value="syscoin">Syscoin NEVM</ion-select-option>
+            <ion-select-option value="syscoinTestnet">Syscoin NEVM Testnet</ion-select-option>
+            <ion-select-option value="ethereum">Ethereum</ion-select-option>
+            <ion-select-option value="polygon">Polygon</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
           <!-- Define button with unique ID to trigger deletion alert -->
           <ion-button id="confirm-delete">
             Delete Seed Phrase
@@ -33,12 +47,27 @@
 </template>
 
 <script lang="ts" setup>
-import { IonAlert, IonButton, IonContent, IonList, IonItem } from '@ionic/vue';
+import { IonAlert, IonButton, IonContent, IonList, IonItem, IonSelect, IonSelectOption } from '@ionic/vue';
 import { getSeedPhrase, removeSeedPhrase } from '@/utils/secureStorage/seed';
 import { useRouter } from "vue-router";
 import BaseLayout from "@/layouts/BaseLayout.vue";
+import { ref, onMounted } from 'vue';
+import {
+  getSelectedNetwork,
+  setSelectedNetwork,
+} from '@/utils/networkUtils';
+import type { EvmNetwork } from '../../../../packages/wallet-core/ethereum/network';
 
 const router = useRouter();
+const network = ref<EvmNetwork>('syscoin');
+
+onMounted(async() => {
+  network.value = await getSelectedNetwork();
+});
+
+async function onNetworkChange() {
+  await setSelectedNetwork(network.value);
+}
 
 // Define alert buttons with designated roles and handlers
 const alertButtons = [

@@ -37,6 +37,11 @@ import BaseLayout from '../layouts/BaseLayout.vue';
 import { useRouter } from 'vue-router';
 import { setPassword } from '@/utils/secureStorage/password';
 
+// Receive the prop where the next route is defined
+const props = defineProps<{ next: string }>();
+// Send to 'createseed' in case of an error
+const nextRoute = props.next ?? 'createseed';
+
 const router = useRouter();
 const password = ref('');
 const repeatPassword = ref('');
@@ -58,7 +63,8 @@ const enterWallet = async() => {
   try {
     // Save the password securely
     await setPassword(password.value);
-    await router.push({ name: 'createseed' });
+    // Navigate to the view defined as prop
+    await router.push({ name: nextRoute });
   } catch (error) {
     errorMessage.value = 'Error saving password.';
     console.error('Error:', error);

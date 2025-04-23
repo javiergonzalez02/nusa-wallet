@@ -3,9 +3,9 @@
     <div v-if="isLoading">
       <p>Loading...</p>
     </div>
-    <div v-else class="login-wrapper">
+    <div v-else>
       <!-- Show login if a seed exists -->
-      <div v-if="requiresPassword">
+      <div v-if="requiresPassword" class="login-wrapper">
         <h1>Welcome Back!</h1>
         <ion-input
             v-model="password"
@@ -20,12 +20,16 @@
         </ion-button>
         <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>
       </div>
-      <!-- Otherwise, show the Create Wallet button -->
-      <div v-else>
+      <!-- Otherwise, offer Create or Import -->
+      <div v-else class="login-wrapper">
         <h1>Welcome!</h1>
         <ion-button @click="createWallet">
           Create Wallet
         </ion-button>
+        <ion-text class="import-text">
+          Already have a wallet?
+          <a @click="importWallet">Import Seed Phrase</a>
+        </ion-text>
       </div>
     </div>
   </BaseLayout>
@@ -33,7 +37,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { IonButton, IonInput, onIonViewWillEnter } from '@ionic/vue';
+import { IonButton, IonInput, IonText, onIonViewWillEnter } from '@ionic/vue';
 import BaseLayout from '../layouts/BaseLayout.vue';
 import { useRouter } from 'vue-router';
 import { getPassword } from '@/utils/secureStorage/password';
@@ -67,9 +71,15 @@ const login = async() => {
 };
 
 const createWallet = async() => {
-  // Navigate to the Create Password view so that a new wallet can be created.
-  await router.push({ name: 'createpass' });
+  // Navigate to the Create Password view so that a new wallet can be created
+  await router.push({ name: 'createpass', query: { next: 'createseed' } });
 };
+
+const importWallet = async () => {
+  // Navigate to the Create Password view specifying that a wallet will be imported
+  await router.push({ name: 'createpass', query: { next: 'importseed' } });
+};
+
 
 // Prevent backwards navigation
 usePreventBack();
@@ -81,5 +91,14 @@ usePreventBack();
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.import-text {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.import-text a {
+  text-decoration: underline;
 }
 </style>

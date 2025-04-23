@@ -56,6 +56,7 @@ import { onMounted, ref } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
 import { getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import { IonContent, IonItem, IonLabel, IonList, IonSegment, IonSegmentButton, modalController } from '@ionic/vue';
+import { getProvider } from '@/utils/networkUtils';
 import SendAssetsModal from "@/components/SendAssetsModal.vue";
 import BaseLayout from "@/layouts/BaseLayout.vue";
 
@@ -81,7 +82,8 @@ onMounted(async() => {
   try {
     const mnemonic = await getSeedPhrase();
     if (mnemonic) {
-      const { address, privateKey, balance } = await getAccountDetails(mnemonic);
+      const provider = await getProvider();
+      const { address, privateKey, balance } = await getAccountDetails(mnemonic, provider);
       accountAddress.value = address;
       accountPrivateKey.value = privateKey;
       accountBalance.value = balance !== null ? balance : 'Error fetching balance';

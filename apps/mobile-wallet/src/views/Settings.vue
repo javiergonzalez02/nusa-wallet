@@ -2,6 +2,7 @@
   <BaseLayout>
     <ion-content>
       <ion-list :inset="true" lines="none">
+        <!-- Network selector -->
         <ion-item>
           <ion-select
               v-model="network"
@@ -10,11 +11,28 @@
               placeholder="Select network"
               label-placement="floating"
           >
-            <ion-select-option value="syscoin">Syscoin NEVM</ion-select-option>
-            <ion-select-option value="syscoinTestnet">Syscoin NEVM Testnet</ion-select-option>
-            <ion-select-option value="ethereum">Ethereum</ion-select-option>
-            <ion-select-option value="polygon">Polygon</ion-select-option>
+            <ion-select-option
+                v-for="n in networks"
+                :key="n.value"
+                :value="n.value"
+            >
+              {{ n.label }}
+            </ion-select-option>
           </ion-select>
+        </ion-item>
+        <!-- Custom RPC inputs -->
+        <ion-item
+            v-for="n in networks"
+            :key="n.value"
+        >
+          <ion-label position="stacked">
+            {{ n.label }} RPC URL
+          </ion-label>
+          <ion-input
+              v-model="customRpcUrls[n.value]"
+              :placeholder="defaultUrls[n.value]"
+              @ionBlur="onRpcUrlChange(n.value)"
+          />
         </ion-item>
         <ion-item>
           <!-- Define button with unique ID to trigger deletion alert -->
@@ -47,7 +65,17 @@
 </template>
 
 <script lang="ts" setup>
-import { IonAlert, IonButton, IonContent, IonList, IonItem, IonSelect, IonSelectOption } from '@ionic/vue';
+import {
+  IonAlert,
+  IonButton,
+  IonContent,
+  IonList,
+  IonItem,
+  IonSelect,
+  IonSelectOption,
+  IonLabel,
+  IonInput
+} from '@ionic/vue';
 import { getSeedPhrase, removeSeedPhrase } from '@/utils/secureStorage/seed';
 import { useRouter } from "vue-router";
 import BaseLayout from "@/layouts/BaseLayout.vue";
@@ -56,17 +84,37 @@ import {
   getSelectedNetwork,
   setSelectedNetwork,
 } from '@/utils/networkUtils';
+import { getCustomRpcUrls, setCustomRpcUrl } from '@/utils/networkRpcUtils';
 import type { EvmNetwork } from '../../../../packages/wallet-core/ethereum/network';
+import { DEFAULT_RPC_URLS } from '../../../../packages/wallet-core/ethereum/network';
 
+const networks = [
+  { value: 'syscoin', label: 'Syscoin NEVM' },
+  { value: 'syscoinTestnet', label: 'Syscoin NEVM Testnet' },
+  { value: 'ethereum', label: 'Ethereum' },
+  { value: 'polygon', label: 'Polygon' },
+] as const;
+
+// reactive state
+const customRpcUrls = ref<Partial<Record<EvmNetwork, string>>>({});
+const defaultUrls = DEFAULT_RPC_URLS;
 const router = useRouter();
 const network = ref<EvmNetwork>('syscoin');
 
 onMounted(async() => {
+  // load selected network
   network.value = await getSelectedNetwork();
+  // load any overrides
+  Object.assign(customRpcUrls, await getCustomRpcUrls());
 });
 
 async function onNetworkChange() {
   await setSelectedNetwork(network.value);
+}
+
+async function onRpcUrlChange(net: EvmNetwork) {
+  const url = customRpcUrls.value[net] ?? '';
+  await setCustomRpcUrl(net, url);
 }
 
 // Define alert buttons with designated roles and handlers

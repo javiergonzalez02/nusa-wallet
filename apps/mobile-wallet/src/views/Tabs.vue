@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-tabs>
-      <ion-router-outlet></ion-router-outlet>
+      <ion-router-outlet />
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="dashboard" href="/tabs/dashboard">
           <ion-icon :icon="speedometerOutline"/>
@@ -27,9 +27,5 @@ import {
   IonIcon
 } from '@ionic/vue';
 import { speedometerOutline, settingsOutline } from 'ionicons/icons';
-import { usePreventBack } from '@/composables/usePreventBack';
-
-// Prevent backwards navigation
-usePreventBack();
 
 </script>

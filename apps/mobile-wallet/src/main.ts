@@ -36,7 +36,10 @@ import './theme/variables.css';
 import './global.css'
 
 const app = createApp(App)
-  .use(IonicVue)
+  .use(IonicVue, {
+    swipeBackEnabled: false,      // turn off Ionic’s swipe-to-go-back
+    hardwareBackButton: false     // also disable Android system back gestures
+  })
   .use(router)
   .use(createPinia());
 

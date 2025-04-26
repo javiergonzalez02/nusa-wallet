@@ -42,7 +42,6 @@ import BaseLayout from '../layouts/BaseLayout.vue';
 import { useRouter } from 'vue-router';
 import { getPassword } from '@/utils/secureStorage/password';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
-import { usePreventBack } from "@/composables/usePreventBack";
 import { useResetOnLeave } from "@/composables/useResetOnLeave";
 
 const router = useRouter();
@@ -87,9 +86,6 @@ const importWallet = async() => {
   await router.push({ name: 'createpass', query: { next: 'importseed' } });
 };
 
-
-// Prevent backwards navigation
-usePreventBack();
 </script>
 
 <style scoped>

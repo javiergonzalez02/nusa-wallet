@@ -33,12 +33,18 @@ import { IonButton, IonItem, IonText, IonTextarea } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import { isValidMnemonic } from '@ethersproject/hdnode';
 import { setSeedPhrase } from '@/utils/secureStorage/seed';
-import { usePreventBack } from '@/composables/usePreventBack';
 import BaseLayout from "@/layouts/BaseLayout.vue";
+import { useResetOnLeave } from "@/composables/useResetOnLeave";
 
 const router = useRouter();
 const seedInput = ref('');
 const errorMessage = ref('');
+
+// clear the textarea (and any error) on leave
+useResetOnLeave(
+    [seedInput, ''],
+    [errorMessage, '']
+);
 
 // Handles Import button click
 const importSeed = async() => {
@@ -64,8 +70,6 @@ const importSeed = async() => {
   }
 };
 
-// Prevent backwards navigation
-usePreventBack();
 </script>
 
 <style scoped>

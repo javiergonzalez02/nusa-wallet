@@ -36,6 +36,7 @@ import { IonButton, IonItem, IonInput } from '@ionic/vue';
 import BaseLayout from '../layouts/BaseLayout.vue';
 import { useRouter } from 'vue-router';
 import { setPassword } from '@/utils/secureStorage/password';
+import { useResetOnLeave } from "@/composables/useResetOnLeave";
 
 // Receive the prop where the next route is defined
 const props = defineProps<{ next: string }>();
@@ -46,6 +47,13 @@ const router = useRouter();
 const password = ref('');
 const repeatPassword = ref('');
 const errorMessage = ref('');
+
+// reset both password fields and errorMessage when leaving the view
+useResetOnLeave(
+    [password, ''],
+    [repeatPassword, ''],
+    [errorMessage, '']
+);
 
 const enterWallet = async() => {
   // Validate the password's length

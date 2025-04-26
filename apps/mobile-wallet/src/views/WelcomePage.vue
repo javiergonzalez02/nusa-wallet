@@ -43,6 +43,7 @@ import { useRouter } from 'vue-router';
 import { getPassword } from '@/utils/secureStorage/password';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
 import { usePreventBack } from "@/composables/usePreventBack";
+import { useResetOnLeave } from "@/composables/useResetOnLeave";
 
 const router = useRouter();
 const password = ref('');
@@ -58,6 +59,12 @@ onIonViewWillEnter(async() => {
   requiresPassword.value = !!seed;
   isLoading.value = false;
 });
+
+// clear the password (and any error) on leave
+useResetOnLeave(
+    [password, ''],
+    [errorMessage, '']
+);
 
 const login = async() => {
   // Retrieve the stored password.
@@ -75,7 +82,7 @@ const createWallet = async() => {
   await router.push({ name: 'createpass', query: { next: 'createseed' } });
 };
 
-const importWallet = async () => {
+const importWallet = async() => {
   // Navigate to the Create Password view specifying that a wallet will be imported
   await router.push({ name: 'createpass', query: { next: 'importseed' } });
 };

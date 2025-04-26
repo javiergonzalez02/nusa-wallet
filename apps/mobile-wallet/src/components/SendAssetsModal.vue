@@ -33,6 +33,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { sendTransaction } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
+import { getProvider } from '@/utils/networkUtils';
 import {
   IonContent,
   IonHeader,
@@ -80,8 +81,10 @@ async function handleTransaction() {
     const formattedAmount = amount.value.toString().replace(',', '.');
     console.log('Amount:', formattedAmount);
 
+    // Get provider from network utils
+    const provider = await getProvider();
     // Send the transaction using the wallet utility function
-    const txHash = await sendTransaction(props.privateKey, recipientAddress.value, formattedAmount);
+    const txHash = await sendTransaction(props.privateKey, recipientAddress.value, formattedAmount, provider);
     console.log('Transaction sent:', txHash);
 
     // Close modal upon successful transaction

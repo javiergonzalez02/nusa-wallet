@@ -2,6 +2,7 @@ import { Storage } from '@ionic/storage';
 import { ethers } from 'ethers';
 import type { EvmNetwork } from '../../../../packages/wallet-core/ethereum/network';
 import { getProviderForNetwork } from '../../../../packages/wallet-core/ethereum/network';
+import { getCustomRpcUrls } from './networkRpcUtils';
 
 const KEY = 'evm-network';
 const storage = new Storage();
@@ -30,9 +31,9 @@ export async function setSelectedNetwork(net: EvmNetwork): Promise<void> {
 /**
  * Build a provider for the *stored* network.
  */
-export async function getProvider(): Promise<
-		ethers.JsonRpcProvider
-> {
+export async function getProvider(): Promise<ethers.JsonRpcProvider> {
 	const net = await getSelectedNetwork();
-	return getProviderForNetwork(net);
+	const overrides = await getCustomRpcUrls();
+  const customRpc = overrides[net];
+	return getProviderForNetwork(net, customRpc);
 }

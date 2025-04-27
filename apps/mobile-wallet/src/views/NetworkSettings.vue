@@ -1,5 +1,5 @@
 <template>
-  <BaseLayout>
+  <BaseLayout showBack title="Network Settings" defaultHref="/tabs/settings">
     <ion-content>
       <ion-list inset lines="none">
         <!-- Network selector -->

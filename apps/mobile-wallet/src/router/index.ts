@@ -8,6 +8,7 @@ import Settings from "@/views/Settings.vue";
 import Tabs from "@/views/Tabs.vue";
 import Dashboard from "@/views/Dashboard.vue";
 import ImportSeed from "@/views/ImportSeed.vue";
+import NetworkSettings from "@/views/NetworkSettings.vue";
 
 const routes: Array<RouteRecordRaw> = [
 	{
@@ -61,6 +62,11 @@ const routes: Array<RouteRecordRaw> = [
 				component: Settings
 			}
 		]
+	},
+	{
+		path: '/settings/network',
+		name: 'NetworkSettings',
+		component: NetworkSettings,
 	}
 ]
 

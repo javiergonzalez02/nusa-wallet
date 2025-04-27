@@ -24,6 +24,6 @@ import { defineProps } from 'vue';
 defineProps({
   showBack: { type: Boolean, default: false },
   title: { type: String, default: '' },
-  defaultHref: { type: String, default: '/welcome' },
+  defaultHref: { type: String, default: '/login' },
 });
 </script>

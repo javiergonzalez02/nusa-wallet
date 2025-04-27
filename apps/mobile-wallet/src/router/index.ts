@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
-import WelcomePage from "@/views/WelcomePage.vue";
+import Login from "@/views/Login.vue";
 import CreatePassword from "@/views/CreatePassword.vue";
 import CreateSeedPhrase from "@/views/CreateSeedPhrase.vue";
 import ConfirmSeedPhrase from "@/views/ConfirmSeedPhrase.vue";
@@ -13,12 +13,12 @@ import NetworkSettings from "@/views/NetworkSettings.vue";
 const routes: Array<RouteRecordRaw> = [
 	{
 		path: '/',
-		redirect: '/welcome'
+		redirect: '/login'
 	},
 	{
-		path: '/welcome',
-		name: 'welcome',
-		component: WelcomePage
+		path: '/login',
+		name: 'login',
+		component: Login
 	},
 	{
 		path: '/createpass',

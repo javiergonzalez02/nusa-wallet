@@ -70,7 +70,7 @@ const alertButtons = [
       } else {
         console.log('No seed phrase found; nothing to remove.');  // Log absence of seed phrase
       }
-      await router.push({ name: 'welcome' }); // Navigate to welcome page
+      await router.push({ name: 'login' }); // Navigate to login page
     },
   },
 ];
@@ -81,8 +81,8 @@ const getMnemonic = async() => {
   alert(seed);
 };
 
-// Define logOut function to navigate to the welcome page
+// Define logOut function to navigate to the login page
 const logOut = async() => {
-  await router.push({ name: 'welcome' });
+  await router.push({ name: 'login' });
 };
 </script>

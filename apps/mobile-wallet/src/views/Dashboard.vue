@@ -22,8 +22,6 @@
             <p>Balance: {{ accountBalance }} SYS</p>
           </ion-card-content>
         </ion-card>
-        <!-- Open SendAssetsModal -->
-        <ion-button id="open-modal" expand="block" @click="openSendModal">Send</ion-button>
         <ion-segment v-model="segment" color="primary">
           <ion-segment-button value="activity">
             <ion-label>Activity</ion-label>
@@ -84,7 +82,6 @@ import {
   modalController
 } from '@ionic/vue';
 import { getProvider } from '@/utils/networkUtils';
-import SendAssetsModal from "@/components/SendAssetsModal.vue";
 import AddTokenModal from '@/components/AddTokenModal.vue';
 import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";
@@ -99,16 +96,6 @@ const segment = ref('activity');
 const accountAddress = ref('Loading...');
 const accountPrivateKey = ref('Loading...');
 const accountBalance = ref('Loading...');
-
-const openSendModal = async() => {
-  const modal = await modalController.create({
-    component: SendAssetsModal,
-    componentProps: {
-      privateKey: accountPrivateKey.value
-    }
-  });
-  await modal.present();
-};
 
 onMounted(async() => {
   try {

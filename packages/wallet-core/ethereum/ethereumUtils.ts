@@ -1,6 +1,22 @@
 import { ethers } from 'ethers';
 
 /**
+ * Minimal ERC-20 interface for reading token data:
+ *  - name():       token name
+ *  - symbol():     token symbol
+ *  - decimals():   decimal precision
+ *  - balanceOf():  balance of a given address
+ *
+ * Needed to encode/decode calls between ethers.js and any ERC-20 contract.
+ */
+const ERC20_ABI = [
+  'function name() view returns (string)',
+  'function symbol() view returns (string)',
+  'function decimals() view returns (uint8)',
+  'function balanceOf(address) view returns (uint256)'
+];
+
+/**
  * Derives the account's address from a mnemonic.
  * @param mnemonic - The mnemonic phrase used to generate the wallet.
  * @returns The account address.
@@ -105,4 +121,49 @@ export async function sendTransaction(
 		// Re-throw the error so that calling code can handle it if needed
 		throw error;
 	}
+}
+
+/**
+ * Fetch basic metadata for an ERC-20 token.
+ *
+ * @param tokenAddress - The on-chain address of the ERC-20 token contract.
+ * @param provider     - An ethers.js JSON-RPC provider connected to the target network.
+ * @returns A Promise that resolves to an object containing:
+ *  • name:     The token’s human-readable name.
+ *  • symbol:   The token’s ticker symbol.
+ *  • decimals: The number of decimal places the token uses.
+ */
+export async function fetchTokenMetadata(
+  tokenAddress: string,
+  provider: ethers.JsonRpcProvider
+): Promise<{ name: string; symbol: string; decimals: number }> {
+  const c = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
+  const [name, symbol, decimals] = await Promise.all([
+    c.name(),
+    c.symbol(),
+    c.decimals()
+  ]);
+  return { name, symbol, decimals };
+}
+
+/**
+ * Fetch the token balance of a specific user address.
+ *
+ * @param tokenAddress - The on-chain address of the ERC-20 token contract.
+ * @param userAddress  - The wallet address whose token balance you want to query.
+ * @param provider     - An ethers.js JSON-RPC provider connected to the target network.
+ * @param decimals     - The token’s decimal precision (from fetchTokenMetadata).
+ * @returns A Promise that resolves to the user’s token balance as a formatted string,
+ *          accounting for the token’s decimals (e.g. "1.2345").
+ */
+export async function fetchTokenBalance(
+  tokenAddress: string,
+  userAddress: string,
+  provider: ethers.JsonRpcProvider,
+  decimals: number
+): Promise<string> {
+  const c = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
+  const bn = await c.balanceOf(userAddress);
+  // Format with the correct decimals
+  return ethers.formatUnits(bn, decimals);
 }

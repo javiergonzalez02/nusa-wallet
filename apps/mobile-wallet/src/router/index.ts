@@ -9,6 +9,7 @@ import Tabs from "@/views/Tabs.vue";
 import Dashboard from "@/views/Dashboard.vue";
 import ImportSeed from "@/views/ImportSeed.vue";
 import NetworkSettings from "@/views/NetworkSettings.vue";
+import Send from "@/views/Send.vue";
 
 const routes: Array<RouteRecordRaw> = [
 	{
@@ -55,6 +56,11 @@ const routes: Array<RouteRecordRaw> = [
 				path: 'dashboard',
 				name: 'dashboard',
 				component: Dashboard
+			},
+			{
+				path: 'send',
+				name: 'send',
+				component: Send
 			},
 			{
 				path: 'settings',

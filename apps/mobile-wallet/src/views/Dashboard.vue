@@ -33,14 +33,22 @@
         <!-- Conditionally display content based on selected segment -->
         <template v-if="segment === 'activity'">
           <section class="activity-section">
-            <ion-list>
-              <ion-item>
-                <ion-label>Transaction 1</ion-label>
-              </ion-item>
-              <ion-item>
-                <ion-label>Transaction 2</ion-label>
+            <ion-list v-if="transactions.length">
+              <ion-item v-for="tx in transactions" :key="tx.hash" lines="full">
+                <ion-label>
+                  <h3>{{ tx.amount }} SYS → {{ tx.to }}</h3>
+                  <p>{{ new Date(tx.timestamp).toLocaleString() }}</p>
+                </ion-label>
+                <!-- simple status pill -->
+                <ion-badge slot="end" :color="{ pending:'medium', confirmed:'success', failed:'danger' }[tx.status]">
+                  {{ tx.status }}
+                </ion-badge>
               </ion-item>
             </ion-list>
+
+            <ion-text v-else color="medium">
+              <p>No transactions yet</p>
+            </ion-text>
           </section>
         </template>
         <template v-else-if="segment === 'assets'">
@@ -86,6 +94,8 @@ import AddTokenModal from '@/components/AddTokenModal.vue';
 import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";
 import { copyOutline } from "ionicons/icons";
+import { initTxHistory, useTxHistory } from "@/utils/txHistory";
+import { resumeTxWatchers } from '@/utils/watchTx';
 
 const tokens = ref<Array<{ address: string; symbol: string; name: string; decimals: number; balance: string }>>([]);
 
@@ -96,6 +106,7 @@ const segment = ref('activity');
 const accountAddress = ref('Loading...');
 const accountPrivateKey = ref('Loading...');
 const accountBalance = ref('Loading...');
+const transactions = useTxHistory();
 
 onMounted(async() => {
   try {
@@ -107,6 +118,8 @@ onMounted(async() => {
       accountPrivateKey.value = privateKey;
       accountBalance.value = balance !== null ? balance : 'Error fetching balance';
       await loadTokens();
+      await initTxHistory();     // load + make reactive
+      await resumeTxWatchers();  // restart any pending watchers
     } else {
       accountAddress.value = 'Mnemonic not found';
       accountPrivateKey.value = 'Mnemonic not found';

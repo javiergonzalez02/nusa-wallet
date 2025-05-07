@@ -35,16 +35,19 @@
           </section>
         </template>
         <template v-else-if="segment === 'assets'">
-          <section class="assets-section">
-            <ion-list>
-              <ion-item>
-                <ion-label>Asset 1</ion-label>
-              </ion-item>
-              <ion-item>
-                <ion-label>Asset 2</ion-label>
-              </ion-item>
-            </ion-list>
-          </section>
+          <!-- Open AddTokenModal -->
+          <ion-button expand="block" @click="openAddTokenModal">Import Token</ion-button>
+          <ion-list>
+            <ion-item v-for="token in tokens" :key="token.address">
+              <ion-label>
+                <h2>{{ token.symbol }}</h2>
+                <p>{{ token.name }} • {{ token.balance }} </p>
+              </ion-label>
+              <ion-button slot="end" fill="clear" @click="removeToken(token.address)">
+                Remove
+              </ion-button>
+            </ion-item>
+          </ion-list>
         </template>
       </div>
     </ion-content>
@@ -54,11 +57,15 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
-import { getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
+import { fetchTokenBalance, getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import { IonContent, IonItem, IonLabel, IonList, IonSegment, IonSegmentButton, modalController } from '@ionic/vue';
 import { getProvider } from '@/utils/networkUtils';
 import SendAssetsModal from "@/components/SendAssetsModal.vue";
+import AddTokenModal from '@/components/AddTokenModal.vue';
+import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";
+
+const tokens = ref<Array<{ address: string; symbol: string; name: string; decimals: number; balance: string }>>([]);
 
 // Use a ref to track the active segment; defaulting to 'activity'
 const segment = ref('activity');
@@ -87,6 +94,7 @@ onMounted(async() => {
       accountAddress.value = address;
       accountPrivateKey.value = privateKey;
       accountBalance.value = balance !== null ? balance : 'Error fetching balance';
+      await loadTokens();
     } else {
       accountAddress.value = 'Mnemonic not found';
       accountPrivateKey.value = 'Mnemonic not found';
@@ -99,6 +107,30 @@ onMounted(async() => {
     accountBalance.value = 'Error fetching balance';
   }
 });
+
+async function loadTokens() {
+  tokens.value = [];
+  const provider = await getProvider();
+  const account = accountAddress.value;
+  const imported = await getImportedTokens();
+  for (const t of imported) {
+    const balance = await fetchTokenBalance(t.address, account, provider, t.decimals);
+    tokens.value.push({ ...t, balance });
+  }
+}
+
+const openAddTokenModal = async() => {
+  const modal = await modalController.create({
+    component: AddTokenModal
+  });
+  modal.onDidDismiss().then(() => loadTokens());
+  await modal.present();
+};
+
+async function removeToken(addr: string) {
+  await removeImportedToken(addr);
+  await loadTokens();
+}
 </script>
 
 <style scoped>
@@ -106,8 +138,7 @@ onMounted(async() => {
   padding: 16px;
 }
 
-.activity-section,
-.assets-section {
+.activity-section {
   margin-top: 16px;
 }
 </style>

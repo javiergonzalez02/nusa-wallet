@@ -80,21 +80,26 @@ export async function getAccountDetails(mnemonic: string, provider: ethers.JsonR
  * Sends an Ethereum transaction on any EVM network.
  *
  * This function creates a wallet instance using the provided private key and the network provider.
- * It constructs a transaction to send a specified amount (in ETH) to a recipient address,
- * sends the transaction, waits for it to be mined, and returns the transaction hash.
+ * It constructs a transaction to send a specified amount (in ETH) to a recipient address and
+ * sends it. It does not wait for confirmation, the caller is responsible to track the result.
  *
  * @param privateKey - The private key of the sender's account.
  * @param toAddress - The recipient's Ethereum address.
  * @param amount - The amount of ETH to send (as a string).
  * @param provider - The provider of the chosen network.
- * @returns A Promise that resolves to the transaction hash (string) once the transaction is confirmed.
+ * @returns The `ethers.TransactionResponse` produced by`wallet.sendTransaction()`.
+ *          –`response.hash`  -> TX hash to monitor
+ *          –`response.wait`  -> call if you *do* want to await mining
+ *
+ * @throws  Re‑throws any error from `ethers` (e.g. insufficient
+ *          gas, invalid nonce, user-provided bad params).
  */
 export async function sendTransaction(
 		privateKey: string,
 		toAddress: string,
 		amount: string,
 		provider: ethers.JsonRpcProvider
-): Promise<string> {
+): Promise<ethers.TransactionResponse> {
 	try {
 		// Create a wallet instance using the provided private key and the network provider
 		const wallet = new ethers.Wallet(privateKey, provider);
@@ -108,13 +113,7 @@ export async function sendTransaction(
 		};
 
 		// Send the transaction using the wallet's sendTransaction method
-		const txResponse = await wallet.sendTransaction(tx);
-
-		// Wait for the transaction to be mined/confirmed on the blockchain
-		await txResponse.wait();
-
-		// Return the transaction hash as confirmation of successful submission
-		return txResponse.hash;
+		return wallet.sendTransaction(tx);
 	} catch (error) {
 		// Log any errors encountered during the transaction process
 		console.error('Error sending transaction:', error);

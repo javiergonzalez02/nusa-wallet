@@ -1,7 +1,7 @@
 <template>
   <!-- Ionic Modal component to send Assets -->
   <ion-header>
-    <ion-toolbar>
+    <ion-toolbar color="primary">
       <ion-title>Send SYS</ion-title>
       <!-- Cancel button -->
       <ion-buttons slot="end">
@@ -43,6 +43,8 @@ import {
   IonTitle,
   IonToolbar,
   IonInput,
+  IonButton,
+  IonButtons,
   modalController
 } from '@ionic/vue';
 

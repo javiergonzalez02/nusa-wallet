@@ -7,7 +7,18 @@
             <ion-card-title>Account Info</ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            <p>Your Account: {{ accountAddress }}</p>
+            <ion-grid class="ion-no-padding">
+              <ion-row>
+                <ion-col>
+                  <ion-item lines="none" fill="clear">
+                    <ion-label>{{ accountAddress }}</ion-label>
+                    <ion-button fill="clear" slot="end" size="small" @click="copyAddress">
+                      <ion-icon :icon="copyOutline"/>
+                    </ion-button>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
             <p>Balance: {{ accountBalance }} SYS</p>
           </ion-card-content>
         </ion-card>
@@ -58,12 +69,26 @@
 import { onMounted, ref } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
 import { fetchTokenBalance, getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
-import { IonContent, IonItem, IonLabel, IonList, IonSegment, IonSegmentButton, modalController } from '@ionic/vue';
+import {
+  IonContent,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonSegment,
+  IonSegmentButton,
+  IonIcon,
+  IonGrid,
+  IonRow,
+  IonCol,
+  toastController,
+  modalController
+} from '@ionic/vue';
 import { getProvider } from '@/utils/networkUtils';
 import SendAssetsModal from "@/components/SendAssetsModal.vue";
 import AddTokenModal from '@/components/AddTokenModal.vue';
 import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";
+import { copyOutline } from "ionicons/icons";
 
 const tokens = ref<Array<{ address: string; symbol: string; name: string; decimals: number; balance: string }>>([]);
 
@@ -108,6 +133,26 @@ onMounted(async() => {
   }
 });
 
+const copyAddress = async() => {
+  try {
+    await navigator.clipboard.writeText(accountAddress.value);
+    const toast = await toastController.create({
+      message: 'Address copied to clipboard',
+      duration: 2000,
+      position: 'bottom',
+    });
+    await toast.present();
+  } catch (err) {
+    console.error('Copy failed', err);
+    const toast = await toastController.create({
+      message: 'Failed to copy address',
+      duration: 2000,
+      position: 'bottom',
+    });
+    await toast.present();
+  }
+};
+
 async function loadTokens() {
   tokens.value = [];
   const provider = await getProvider();
@@ -141,4 +186,12 @@ async function removeToken(addr: string) {
 .activity-section {
   margin-top: 16px;
 }
+
+/* Match ion-item background to its parent ion-card */
+ion-card ion-item {
+  --background: var(--ion-card-background);
+  --background-ios: var(--ion-card-background);
+  --background-md: var(--ion-card-background);
+}
+
 </style>

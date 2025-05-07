@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { sendTransaction, getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
-import { getProvider } from '@/utils/networkUtils';
+import { getProvider, getSelectedNetwork } from '@/utils/networkUtils';
 import {
   IonButton,
   IonContent,
@@ -33,11 +33,12 @@ import {
   IonItem,
   IonLabel,
   IonList,
-  modalController,
   toastController
 } from '@ionic/vue';
 import BaseLayout from "@/layouts/BaseLayout.vue";
 import { getSeedPhrase } from "@/utils/secureStorage/seed";
+import { addTx } from "@/utils/txHistory";
+import { trackTx } from "@/utils/watchTx";
 
 // Ref variables
 const recipientAddress = ref();           // User input for recipient's address
@@ -68,11 +69,6 @@ onMounted(async() => {
   }
 });
 
-// Dismiss modal
-function dismiss() {
-  modalController.dismiss();
-}
-
 // Handles the transaction process
 async function handleTransaction() {
   try {
@@ -96,11 +92,22 @@ async function handleTransaction() {
     // Get provider from network utils
     const provider = await getProvider();
     // Send the transaction using the wallet utility function
-    const txHash = await sendTransaction(privateKey.value, recipientAddress.value, formattedAmount, provider);
-    console.log('Transaction sent:', txHash);
+    const txResp = await sendTransaction(privateKey.value, recipientAddress.value, formattedAmount, provider);
+    console.log('Transaction sent:', txResp);
 
-    // Close modal upon successful transaction
-    dismiss();
+    const txRec = {
+      hash: txResp.hash,
+      from: txResp.from,
+      to: txResp.to!,
+      amount: formattedAmount,
+      timestamp: Date.now(),
+      status: 'pending' as const
+    };
+    addTx(txRec);          // instant UI update
+    trackTx(txRec.hash);
+
+    // UI clean‑up
+    loading.value = false;
   } catch (error: any) {
     console.error('Error sending transaction:', error);
     alert('Transaction failed: ' + error.message);

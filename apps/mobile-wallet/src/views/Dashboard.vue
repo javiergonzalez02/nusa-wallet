@@ -1,72 +1,77 @@
 <template>
   <BaseLayout>
     <ion-content :fullscreen="true">
-      <div class="dashboard-container">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Account Info</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-grid class="ion-no-padding">
-              <ion-row>
-                <ion-col>
-                  <ion-item lines="none" fill="clear">
-                    <ion-label>{{ accountAddress }}</ion-label>
-                    <ion-button fill="clear" slot="end" size="small" @click="copyAddress">
-                      <ion-icon :icon="copyOutline"/>
-                    </ion-button>
-                  </ion-item>
-                </ion-col>
-              </ion-row>
-            </ion-grid>
-            <p>Balance: {{ accountBalance }} SYS</p>
-          </ion-card-content>
-        </ion-card>
-        <ion-segment v-model="segment" color="primary">
-          <ion-segment-button value="activity">
-            <ion-label>Activity</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="assets">
-            <ion-label>Assets</ion-label>
-          </ion-segment-button>
-        </ion-segment>
-        <!-- Conditionally display content based on selected segment -->
-        <template v-if="segment === 'activity'">
-          <section class="activity-section">
-            <ion-list v-if="transactions.length">
-              <ion-item v-for="tx in transactions" :key="tx.hash" lines="full">
-                <ion-label>
-                  <h3>{{ tx.amount }} SYS → {{ tx.to }}</h3>
-                  <p>{{ new Date(tx.timestamp).toLocaleString() }}</p>
-                </ion-label>
-                <!-- simple status pill -->
-                <ion-badge slot="end" :color="{ pending:'medium', confirmed:'success', failed:'danger' }[tx.status]">
-                  {{ tx.status }}
-                </ion-badge>
-              </ion-item>
-            </ion-list>
-
-            <ion-text v-else color="medium">
-              <p>No transactions yet</p>
-            </ion-text>
-          </section>
-        </template>
-        <template v-else-if="segment === 'assets'">
-          <!-- Open AddTokenModal -->
-          <ion-button expand="block" @click="openAddTokenModal">Import Token</ion-button>
-          <ion-list>
-            <ion-item v-for="token in tokens" :key="token.address">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Account Info</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-grid class="ion-no-padding">
+            <ion-row>
+              <ion-col>
+                <ion-item lines="none" fill="clear">
+                  <ion-label>{{ accountAddress }}</ion-label>
+                  <ion-button fill="clear" slot="end" size="small" @click="copyAddress">
+                    <ion-icon :icon="copyOutline"/>
+                  </ion-button>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+          <p>Balance: {{ accountBalance }} SYS</p>
+        </ion-card-content>
+      </ion-card>
+      <ion-segment v-model="segment" color="primary">
+        <ion-segment-button value="activity">
+          <ion-label>Activity</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="assets">
+          <ion-label>Assets</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+      <!-- Conditionally display content based on selected segment -->
+      <template v-if="segment === 'activity'">
+        <section class="activity-section">
+          <ion-list v-if="transactions.length">
+            <ion-item v-for="tx in transactions" :key="tx.hash" lines="full">
               <ion-label>
-                <h2>{{ token.symbol }}</h2>
-                <p>{{ token.name }} • {{ token.balance }} </p>
+                <h3>{{ tx.amount }} SYS → {{ tx.to }}</h3>
+                <p>{{ new Date(tx.timestamp).toLocaleString() }}</p>
               </ion-label>
-              <ion-button slot="end" fill="clear" @click="removeToken(token.address)">
-                Remove
-              </ion-button>
+              <!-- simple status pill -->
+              <ion-badge slot="end" :color="{ pending:'medium', confirmed:'success', failed:'danger' }[tx.status]">
+                {{ tx.status }}
+              </ion-badge>
             </ion-item>
           </ion-list>
-        </template>
-      </div>
+
+          <ion-text v-else color="medium">
+            <p>No transactions yet</p>
+          </ion-text>
+        </section>
+      </template>
+      <template v-else-if="segment === 'assets'">
+        <!-- Open AddTokenModal -->
+        <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+          <ion-fab-button @click="openAddTokenModal">
+            <ion-icon :icon="add"/>
+          </ion-fab-button>
+        </ion-fab>
+        <ion-list v-if="tokens.length">
+          <ion-item v-for="token in tokens" :key="token.address">
+            <ion-label>
+              <h2>{{ token.symbol }}</h2>
+              <p>{{ token.name }} • {{ token.balance }} </p>
+            </ion-label>
+            <ion-button slot="end" fill="clear" @click="removeToken(token.address)">
+              Remove
+            </ion-button>
+          </ion-item>
+        </ion-list>
+        <ion-text v-else color="medium">
+          <p>No tokens yet. Tap the “+” button at bottom-right to add one.</p>
+        </ion-text>
+      </template>
     </ion-content>
   </BaseLayout>
 </template>
@@ -86,6 +91,8 @@ import {
   IonGrid,
   IonRow,
   IonCol,
+  IonFab,
+  IonFabButton,
   toastController,
   modalController
 } from '@ionic/vue';
@@ -93,7 +100,7 @@ import { getProvider } from '@/utils/networkUtils';
 import AddTokenModal from '@/components/AddTokenModal.vue';
 import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";
-import { copyOutline } from "ionicons/icons";
+import { add, copyOutline } from "ionicons/icons";
 import { initTxHistory, useTxHistory } from "@/utils/txHistory";
 import { resumeTxWatchers } from '@/utils/watchTx';
 
@@ -179,10 +186,6 @@ async function removeToken(addr: string) {
 </script>
 
 <style scoped>
-.dashboard-container {
-  padding: 16px;
-}
-
 .activity-section {
   margin-top: 16px;
 }
@@ -193,5 +196,4 @@ ion-card ion-item {
   --background-ios: var(--ion-card-background);
   --background-md: var(--ion-card-background);
 }
-
 </style>

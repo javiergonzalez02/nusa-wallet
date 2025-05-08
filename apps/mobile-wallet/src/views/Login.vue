@@ -1,5 +1,5 @@
 <template>
-  <BaseLayout>
+  <BaseLayout :showLogout=false>
     <div v-if="isLoading">
       <p>Loading...</p>
     </div>

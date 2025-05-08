@@ -9,6 +9,7 @@ import Tabs from "@/views/Tabs.vue";
 import Dashboard from "@/views/Dashboard.vue";
 import ImportSeed from "@/views/ImportSeed.vue";
 import NetworkSettings from "@/views/NetworkSettings.vue";
+import SecuritySettings from "@/views/SecuritySettings.vue";
 import Send from "@/views/Send.vue";
 
 const routes: Array<RouteRecordRaw> = [
@@ -73,6 +74,12 @@ const routes: Array<RouteRecordRaw> = [
 		path: '/settings/network',
 		name: 'NetworkSettings',
 		component: NetworkSettings,
+	}
+	,
+	{
+		path: '/settings/security',
+		name: 'SecuritySettings',
+		component: SecuritySettings,
 	}
 ]
 

@@ -29,6 +29,22 @@ async function ready() {
 	await storageReady;
 }
 
+/**
+ * Save the current in-memory tx list (`list.value`) under the
+ * bucket of the *currently* selected network.
+ *
+ * @returns Promise that resolves when the write to Ionic Storage completes.
+ */
+async function persist(): Promise<void> {
+	await ready();                                   // make sure storage exists
+	const net = await getSelectedNetwork();          // current network
+	// Load the saved network‑to‑txlist map (or use an empty object if nothing’s stored),
+	// and tell TypeScript it’s (possibly partial) Record<EvmNetwork, TxRecord[]>.
+	const all = (await storage.get(KEY)) as Partial<Record<EvmNetwork, TxRecord[]>> ?? {};
+	all[net] = JSON.parse(JSON.stringify(list.value)); // deep-clone to strip refs
+	await storage.set(KEY, all);                     // write back
+}
+
 // Active history list – auto-updates UI when modified
 const list = ref<TxRecord[]>([]);
 // Current active network (used to separate TXs by network)
@@ -73,8 +89,9 @@ export function useTxHistory() {
  *
  * @param tx - A new TxRecord (usually with status 'pending').
  */
-export function addTx(tx: TxRecord) {
+export async function addTx(tx: TxRecord) {
 	list.value.unshift(tx);
+	await persist();
 }
 
 /**
@@ -84,7 +101,10 @@ export function addTx(tx: TxRecord) {
  * @param hash - The transaction hash (txid).
  * @param s    - New status: 'pending', 'confirmed', or 'failed'.
  */
-export function updateStatus(hash: string, s: TxStatus) {
+export async function updateStatus(hash: string, s: TxStatus) {
 	const idx = list.value.findIndex(t => t.hash === hash);
-	if (idx !== -1) list.value[idx].status = s;
+	if (idx !== -1) {
+		list.value[idx].status = s;
+		await persist();
+	}
 }

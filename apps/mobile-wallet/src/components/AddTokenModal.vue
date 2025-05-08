@@ -1,11 +1,11 @@
 <template>
   <!-- Modal header with title and cancel button -->
   <ion-header>
-    <ion-toolbar>
+    <ion-toolbar color="primary">
       <ion-title>Import Token</ion-title>
       <ion-buttons slot="end">
         <!-- Emit 'dismiss' event when clicked to close the modal -->
-        <ion-button @click="$emit('dismiss')">Cancel</ion-button>
+        <ion-button @click="dismiss()">Cancel</ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -44,6 +44,11 @@ const tokenAddress = ref('');
 const isValid = computed(() =>
     isAddress(tokenAddress.value.trim())
 );
+
+// Dismiss modal
+function dismiss() {
+  modalController.dismiss();
+}
 
 const importToken = async() => {
   const provider = await getProvider();

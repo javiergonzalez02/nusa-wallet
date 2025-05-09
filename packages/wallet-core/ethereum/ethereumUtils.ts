@@ -10,10 +10,11 @@ import { ethers } from 'ethers';
  * Needed to encode/decode calls between ethers.js and any ERC-20 contract.
  */
 const ERC20_ABI = [
-  'function name() view returns (string)',
-  'function symbol() view returns (string)',
-  'function decimals() view returns (uint8)',
-  'function balanceOf(address) view returns (uint256)'
+	'function name() view returns (string)',
+	'function symbol() view returns (string)',
+	'function decimals() view returns (uint8)',
+	'function balanceOf(address) view returns (uint256)',
+	'function transfer(address to, uint256 value) returns (bool)'
 ];
 
 /**
@@ -133,16 +134,16 @@ export async function sendTransaction(
  *  • decimals: The number of decimal places the token uses.
  */
 export async function fetchTokenMetadata(
-  tokenAddress: string,
-  provider: ethers.JsonRpcProvider
+		tokenAddress: string,
+		provider: ethers.JsonRpcProvider
 ): Promise<{ name: string; symbol: string; decimals: number }> {
-  const c = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
-  const [name, symbol, decimals] = await Promise.all([
-    c.name(),
-    c.symbol(),
-    c.decimals()
-  ]);
-  return { name, symbol, decimals };
+	const c = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
+	const [name, symbol, decimals] = await Promise.all([
+		c.name(),
+		c.symbol(),
+		c.decimals()
+	]);
+	return { name, symbol, decimals };
 }
 
 /**
@@ -156,13 +157,58 @@ export async function fetchTokenMetadata(
  *          accounting for the token’s decimals (e.g. "1.2345").
  */
 export async function fetchTokenBalance(
-  tokenAddress: string,
-  userAddress: string,
-  provider: ethers.JsonRpcProvider,
-  decimals: number
+		tokenAddress: string,
+		userAddress: string,
+		provider: ethers.JsonRpcProvider,
+		decimals: number
 ): Promise<string> {
-  const c = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
-  const bn = await c.balanceOf(userAddress);
-  // Format with the correct decimals
-  return ethers.formatUnits(bn, decimals);
+	const c = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
+	const bn = await c.balanceOf(userAddress);
+	// Format with the correct decimals
+	return ethers.formatUnits(bn, decimals);
+}
+
+/**
+ * Send an ERC-20 token transfer
+ *
+ * @param privateKey   The sender’s private key.
+ * @param tokenAddress ERC-20 contract address.
+ * @param toAddress    Recipient wallet address.
+ * @param amount       Amount **in human units** (e.g. `"1.5"` DAI, *not* wei).
+ * @param provider     ethers.js JSON-RPC provider for the target network.
+ *
+ * @returns `ethers.TransactionResponse`:
+ *           - `.hash`: tx hash for explorers
+ *           -`.wait()`: await mining if desired
+ *
+ * @throws Re-throws any ethers.js error (insufficient balance, transfer reverted, bad params, etc.).
+ */
+export async function sendERC20(
+		privateKey: string,
+		tokenAddress: string,
+		toAddress: string,
+		amount: string,
+		provider: ethers.JsonRpcProvider
+): Promise<ethers.TransactionResponse> {
+	try {
+		// 1) Create signer
+		const wallet = new ethers.Wallet(privateKey, provider);
+
+		// 2) Connect to the token contract with the signer attached
+		const erc20 = new ethers.Contract(tokenAddress, ERC20_ABI, wallet);
+
+		// 3) Discover the token’s decimals so it can be converted to “wei”
+		const decimals: number = await erc20.decimals();
+		const value = ethers.parseUnits(amount, decimals);    // BigNumber in token units
+
+		// 4) Fire the transfer
+		// Ethers builds the calldata for `transfer(address,uint256)` and signs a tx that pays gas in ETH.
+		return erc20.transfer(
+				toAddress,
+				value
+		);   // caller can `.wait()` to block
+	} catch (error) {
+		console.error('Error sending ERC-20 tokens:', error);
+		throw error;
+	}
 }

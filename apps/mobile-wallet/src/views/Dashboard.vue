@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
 import { fetchTokenBalance, getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import {
@@ -103,6 +103,8 @@ import BaseLayout from "@/layouts/BaseLayout.vue";
 import { add, copyOutline } from "ionicons/icons";
 import { initTxHistory, useTxHistory } from "@/utils/txHistory";
 import { resumeTxWatchers } from '@/utils/watchTx';
+import { watchBalance } from '@/utils/watchBalance';
+import { formatEther } from "ethers";
 
 const tokens = ref<Array<{ address: string; symbol: string; name: string; decimals: number; balance: string }>>([]);
 
@@ -114,6 +116,9 @@ const accountAddress = ref('Loading...');
 const accountPrivateKey = ref('Loading...');
 const accountBalance = ref('Loading...');
 const transactions = useTxHistory();
+// Holds the disposer function for the active balance watcher, or undefined if no watcher is running
+let stopBalanceWatch: (() => void) | undefined;
+
 
 onMounted(async() => {
   try {
@@ -127,6 +132,14 @@ onMounted(async() => {
       await loadTokens();
       await initTxHistory();     // load + make reactive
       await resumeTxWatchers();  // restart any pending watchers
+      // Start watching the on‑chain balance of the account
+    stopBalanceWatch = await watchBalance(
+      accountAddress.value,
+      (wei) => {
+        // Update the reactive balance when a new block arrives
+        accountBalance.value = formatEther(wei);
+      }
+    );
     } else {
       accountAddress.value = 'Mnemonic not found';
       accountPrivateKey.value = 'Mnemonic not found';
@@ -138,6 +151,11 @@ onMounted(async() => {
     accountPrivateKey.value = 'Error fetching private key';
     accountBalance.value = 'Error fetching balance';
   }
+});
+
+onUnmounted(() => {
+  // Stop watching balance when the component is destroyed
+  if (stopBalanceWatch) stopBalanceWatch();
 });
 
 const copyAddress = async() => {

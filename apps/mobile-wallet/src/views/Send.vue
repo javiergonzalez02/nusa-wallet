@@ -4,7 +4,13 @@
       <ion-list>
         <!-- Asset selector -->
         <ion-item>
-          <ion-select label="Select Asset" label-placement="floating" v-model="selectedAsset">
+          <ion-select
+              label="Select Asset"
+              label-placement="floating"
+              interface="popover"
+              :value="nativeSymbol"
+              v-model="selectedAsset"
+          >
             <!-- Lists native coin -->
             <ion-select-option :value="nativeSymbol">{{ nativeSymbol }}</ion-select-option>
             <!-- Lists imported ERC‑20 tokens -->

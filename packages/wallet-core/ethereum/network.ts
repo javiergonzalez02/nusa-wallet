@@ -1,30 +1,81 @@
 import { ethers } from 'ethers';
 
-export type EvmNetwork = 'syscoin' | 'syscoinTestnet' | 'ethereum' | 'polygon';
+export const NETWORKS = {
+  syscoin: {
+    key: 'syscoin',
+    label: 'Syscoin',
+    chainId: 57,
+    nativeSymbol: 'SYS',
+    rpcUrls: ['https://rpc.syscoin.org'],
+    blockExplorer: 'https://explorer.syscoin.org',
+  },
+  syscoinTestnet: {
+    key: 'syscoinTestnet',
+    label: 'Syscoin NEVM',
+    chainId: 5700,
+    nativeSymbol: 'tSYS',
+    rpcUrls: ['https://rpc.tanenbaum.io'],
+    blockExplorer: 'https://tanenbaum.io',
+  },
+  ethereum: {
+    key: 'ethereum',
+    label: 'Ethereum Mainnet',
+    chainId: 1,
+    nativeSymbol: 'ETH',
+    rpcUrls: ['https://eth.llamarpc.com'],
+    blockExplorer: 'https://etherscan.io',
+  },
+  ethereumSepolia: {
+    key: 'ethereumSepolia',
+    label: 'Ethereum Sepolia',
+    chainId: 11155111,
+    nativeSymbol: 'ETH',
+    rpcUrls: ['https://eth-sepolia.public.blastapi.io'],
+    blockExplorer: 'https://sepolia.etherscan.io',
+  },
+  polygon: {
+    key: 'polygon',
+    label: 'Polygon',
+    chainId: 137,
+    nativeSymbol: 'POL',
+    rpcUrls: ['https://polygon-rpc.com'],
+    blockExplorer: 'https://polygonscan.com',
+  },
+} as const;
 
-export const DEFAULT_RPC_URLS: Record<EvmNetwork, string> = {
-	syscoin: 'https://rpc.syscoin.org',                       // Syscoin NEVM Mainnet
-	syscoinTestnet: 'https://rpc.tanenbaum.io',               // Syscoin NEVM Testnet
-	ethereum: 'https://eth.llamarpc.com',                     // Ethereum Mainnet
-	polygon: 'https://polygon-rpc.com',                       // Polygon Mainnet
-};
+export const NETWORK_LIST: readonly NetworkInfo[] = Object.values(NETWORKS);
 
-/**
- * Returns either the custom RPC (if provided & non‐empty),
- * or falls back to DEFAULT_RPC_URLS.
- */
-export function getRpcUrl(network: EvmNetwork, customRpcUrl?: string): string {
-	if (customRpcUrl && customRpcUrl.trim() !== '') {
-		return customRpcUrl.trim();
-	}
-	return DEFAULT_RPC_URLS[network];
+export type NetworkKey = keyof typeof NETWORKS;
+
+export interface NetworkInfo {
+  key: NetworkKey;
+  label: string;
+  chainId: number;
+  nativeSymbol: string;
+  rpcUrls: readonly string[];
+  blockExplorer?: string;
 }
 
 /**
- * Build a JsonRpcProvider for the given network.
- * optionally using a user-supplied RPC URL.
+ * Fetch the full NetworkInfo object by key.
  */
-export function getProviderForNetwork(network: EvmNetwork, customRpcUrl?: string): ethers.JsonRpcProvider {
-	const url = getRpcUrl(network, customRpcUrl);
-	return new ethers.JsonRpcProvider(url);
+export function getNetworkInfo(key: NetworkKey): NetworkInfo {
+  return NETWORKS[key];
+}
+
+/**
+ * Returns either the custom RPC (if provided & non‐empty), or falls back to default rpc.
+ */
+export function getRpcUrl(key: NetworkKey, customRpcUrl?: string): string {
+	if (customRpcUrl && customRpcUrl.trim() !== '') {
+		return customRpcUrl.trim();
+	}
+	return getNetworkInfo(key).rpcUrls[0];
+}
+
+/**
+ * Build a JsonRpcProvider for the given network, optionally use a custom RPC URL.
+ */
+export function getProviderForNetwork(key: NetworkKey, customRpcUrl?: string): ethers.JsonRpcProvider {
+	return new ethers.JsonRpcProvider(getRpcUrl(key, customRpcUrl));
 }

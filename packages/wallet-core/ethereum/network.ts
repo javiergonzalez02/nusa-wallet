@@ -5,7 +5,7 @@ export type EvmNetwork = 'syscoin' | 'syscoinTestnet' | 'ethereum' | 'polygon';
 export const DEFAULT_RPC_URLS: Record<EvmNetwork, string> = {
 	syscoin: 'https://rpc.syscoin.org',                       // Syscoin NEVM Mainnet
 	syscoinTestnet: 'https://rpc.tanenbaum.io',               // Syscoin NEVM Testnet
-	ethereum: 'https://mainnet.infura.io/v3/YOUR_INFURA',     // Ethereum Mainnet
+	ethereum: 'https://eth.llamarpc.com',                     // Ethereum Mainnet
 	polygon: 'https://polygon-rpc.com',                       // Polygon Mainnet
 };
 

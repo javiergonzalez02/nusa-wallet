@@ -18,7 +18,7 @@
               </ion-col>
             </ion-row>
           </ion-grid>
-          <p>Balance: {{ accountBalance }} SYS</p>
+          <p>Balance: {{ accountBalance }} {{nativeSymbol}}</p>
         </ion-card-content>
       </ion-card>
       <ion-segment v-model="segment" color="primary">
@@ -35,7 +35,7 @@
           <ion-list v-if="transactions.length">
             <ion-item v-for="tx in transactions" :key="tx.hash" lines="full">
               <ion-label>
-                <h3>{{ tx.amount }} SYS → {{ tx.to }}</h3>
+                <h3>{{ tx.amount }} {{nativeSymbol}} → {{ tx.to }}</h3>
                 <p>{{ new Date(tx.timestamp).toLocaleString() }}</p>
               </ion-label>
               <!-- simple status pill -->
@@ -96,7 +96,7 @@ import {
   toastController,
   modalController
 } from '@ionic/vue';
-import { getProvider } from '@/utils/networkUtils';
+import { getProvider, getSelectedNetworkInfo } from '@/utils/networkUtils';
 import AddTokenModal from '@/components/AddTokenModal.vue';
 import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";
@@ -105,6 +105,7 @@ import { initTxHistory, useTxHistory } from "@/utils/txHistory";
 import { resumeTxWatchers } from '@/utils/watchTx';
 import { watchBalance } from '@/utils/watchBalance';
 import { formatEther } from "ethers";
+import { NetworkInfo } from "../../../../packages/wallet-core/ethereum/network";
 
 const tokens = ref<Array<{ address: string; symbol: string; name: string; decimals: number; balance: string }>>([]);
 
@@ -115,6 +116,7 @@ const segment = ref('activity');
 const accountAddress = ref('Loading...');
 const accountPrivateKey = ref('Loading...');
 const accountBalance = ref('Loading...');
+const nativeSymbol = ref(''); // Reactive variable for the native currency symbol
 const transactions = useTxHistory();
 // Holds the disposer function for the active balance watcher, or undefined if no watcher is running
 let stopBalanceWatch: (() => void) | undefined;
@@ -124,6 +126,10 @@ onMounted(async() => {
   try {
     const mnemonic = await getSeedPhrase();
     if (mnemonic) {
+      // Fetch network information to get the native symbol
+      const networkInfo: NetworkInfo = await getSelectedNetworkInfo();
+      nativeSymbol.value = networkInfo.nativeSymbol;
+      // Provider for the selected network
       const provider = await getProvider();
       const { address, privateKey, balance } = await getAccountDetails(mnemonic, provider);
       accountAddress.value = address;

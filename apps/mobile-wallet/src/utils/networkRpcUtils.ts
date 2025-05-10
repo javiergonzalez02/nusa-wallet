@@ -1,5 +1,5 @@
 import { Storage } from '@ionic/storage';
-import type { EvmNetwork } from '../../../../packages/wallet-core/ethereum/network';
+import type { NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
 
 const KEY = 'custom-rpc-urls';
 const storage = new Storage();
@@ -13,13 +13,13 @@ async function ready() {
  * Returns an object mapping networks to their custom URLs.
  * If nothing was saved, returns an empty object.
  */
-export async function getCustomRpcUrls(): Promise<Partial<Record<EvmNetwork, string>>> {
+export async function getCustomRpcUrls(): Promise<Partial<Record<NetworkKey, string>>> {
 	// Ensure the Ionic Storage instance is ready
 	await ready();
 
 	// Attempt to read the stored value (could be an object or null)
 	// Assert its type so TypeScript knows it’s either a partial map or null
-	const data = (await storage.get(KEY)) as Partial<Record<EvmNetwork, string>> | null;
+	const data = (await storage.get(KEY)) as Partial<Record<NetworkKey, string>> | null;
 
 	// If storage returned null (nothing saved), give back {} instead of null
 	return data ?? {};
@@ -32,7 +32,7 @@ export async function getCustomRpcUrls(): Promise<Partial<Record<EvmNetwork, str
  * @param network - The EVM network (e.g., 'syscoin' or 'ethereum')
  * @param url     - The RPC URL to save; if empty or whitespace-only, the override is removed
  */
-export async function setCustomRpcUrl(network: EvmNetwork, url: string): Promise<void> {
+export async function setCustomRpcUrl(network: NetworkKey, url: string): Promise<void> {
 	// Make sure the Storage instance is initialized
 	await ready();
 

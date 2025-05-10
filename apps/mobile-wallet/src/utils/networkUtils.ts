@@ -1,6 +1,6 @@
 import { Storage } from '@ionic/storage';
 import { ethers } from 'ethers';
-import type { EvmNetwork } from '../../../../packages/wallet-core/ethereum/network';
+import type { NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
 import { getProviderForNetwork } from '../../../../packages/wallet-core/ethereum/network';
 import { getCustomRpcUrls } from './networkRpcUtils';
 
@@ -14,16 +14,16 @@ async function ready() {
 /**
  * Read or default to 'syscoin'.
  */
-export async function getSelectedNetwork(): Promise<EvmNetwork> {
+export async function getSelectedNetwork(): Promise<NetworkKey> {
 	await ready();
-	const n = (await storage.get(KEY)) as EvmNetwork | null;
+	const n = (await storage.get(KEY)) as NetworkKey | null;
 	return n ?? 'syscoin';
 }
 
 /**
  * Persist the user’s pick.
  */
-export async function setSelectedNetwork(net: EvmNetwork): Promise<void> {
+export async function setSelectedNetwork(net: NetworkKey): Promise<void> {
 	await ready();
 	await storage.set(KEY, net);
 }

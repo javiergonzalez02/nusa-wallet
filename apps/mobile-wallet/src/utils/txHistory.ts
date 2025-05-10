@@ -1,6 +1,6 @@
 import { ref, watch } from 'vue';
 import { Storage } from '@ionic/storage';
-import type { EvmNetwork } from '../../../../packages/wallet-core/ethereum/network';
+import type { NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
 import { getSelectedNetwork } from "@/utils/networkUtils";
 
 // Possible states a tracked transaction can have
@@ -41,7 +41,7 @@ async function persist(): Promise<void> {
 	const net = await getSelectedNetwork();          // current network
 	// Load the saved network‑to‑txlist map (or use an empty object if nothing’s stored),
 	// and tell TypeScript it’s (possibly partial) Record<EvmNetwork, TxRecord[]>.
-	const all = (await storage.get(KEY)) as Partial<Record<EvmNetwork, TxRecord[]>> ?? {};
+	const all = (await storage.get(KEY)) as Partial<Record<NetworkKey, TxRecord[]>> ?? {};
 	all[net] = JSON.parse(JSON.stringify(list.value)); // deep-clone to strip refs
 	await storage.set(KEY, all);                     // write back
 }
@@ -49,7 +49,7 @@ async function persist(): Promise<void> {
 // Active history list – auto-updates UI when modified
 const list = ref<TxRecord[]>([]);
 // Current active network (used to separate TXs by network)
-let network: EvmNetwork;
+let network: NetworkKey;
 
 /**
  * Initializes the history system:
@@ -61,7 +61,7 @@ export async function initTxHistory() {
 	await ready();
 	network = await getSelectedNetwork();
 	list.value = await storage.get(KEY).then((all) =>
-			(all as Record<EvmNetwork, TxRecord[]> ?? {})[network] ?? []
+			(all as Record<NetworkKey, TxRecord[]> ?? {})[network] ?? []
 	);
 }
 
@@ -71,7 +71,7 @@ export async function initTxHistory() {
  */
 watch(list, async(newVal) => {
 	await ready();
-	const all = (await storage.get(KEY)) as Record<EvmNetwork, TxRecord[]> ?? {};
+	const all = (await storage.get(KEY)) as Record<NetworkKey, TxRecord[]> ?? {};
 	all[network] = newVal;
 	await storage.set(KEY, all);
 }, { deep: true });

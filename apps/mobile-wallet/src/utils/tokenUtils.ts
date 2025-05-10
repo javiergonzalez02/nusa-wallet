@@ -1,5 +1,5 @@
 import { Storage } from '@ionic/storage';
-import type { EvmNetwork } from '../../../../packages/wallet-core/ethereum/network';
+import type { NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
 import { getSelectedNetwork } from './networkUtils';
 
 /**
@@ -37,7 +37,7 @@ async function ready() {
 export async function getImportedTokens(): Promise<ImportedToken[]> {
   await ready();
   const net = await getSelectedNetwork();
-  const all = (await storage.get(STORAGE_KEY)) as Record<EvmNetwork, ImportedToken[]> || {};
+  const all = (await storage.get(STORAGE_KEY)) as Record<NetworkKey, ImportedToken[]> || {};
   return all[net] || [];
 }
 
@@ -50,7 +50,7 @@ export async function getImportedTokens(): Promise<ImportedToken[]> {
 export async function addImportedToken(token: ImportedToken): Promise<void> {
   await ready();
   const net = await getSelectedNetwork();
-  const all = (await storage.get(STORAGE_KEY)) as Record<EvmNetwork, ImportedToken[]> || {};
+  const all = (await storage.get(STORAGE_KEY)) as Record<NetworkKey, ImportedToken[]> || {};
   const existing = all[net] || [];
 
   // Only add if this address isn’t already in the list
@@ -69,7 +69,7 @@ export async function addImportedToken(token: ImportedToken): Promise<void> {
 export async function removeImportedToken(address: string): Promise<void> {
   await ready();
   const net = await getSelectedNetwork();
-  const all = (await storage.get(STORAGE_KEY)) as Record<EvmNetwork, ImportedToken[]> || {};
+  const all = (await storage.get(STORAGE_KEY)) as Record<NetworkKey, ImportedToken[]> || {};
   all[net] = (all[net] || []).filter(t => t.address.toLowerCase() !== address.toLowerCase());
   await storage.set(STORAGE_KEY, all);
 }

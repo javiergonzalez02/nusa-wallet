@@ -13,8 +13,8 @@
           >
             <ion-select-option
               v-for="n in networks"
-              :key="n.value"
-              :value="n.value"
+              :key="n.key"
+              :value="n.key"
             >
               {{ n.label }}
             </ion-select-option>
@@ -29,7 +29,7 @@
           <!-- bind to tempRpc, not customRpcUrls[...] -->
           <ion-input
             v-model="tempRpc"
-            :placeholder="defaultUrls[network]"
+            :placeholder="defaultUrl(network)"
           />
         </ion-item>
 
@@ -53,21 +53,15 @@ import { IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, IonSelect,
 import BaseLayout from '@/layouts/BaseLayout.vue';
 import { getSelectedNetwork, setSelectedNetwork, } from '@/utils/networkUtils';
 import { getCustomRpcUrls, setCustomRpcUrl, } from '@/utils/networkRpcUtils';
-import type { EvmNetwork } from '../../../../packages/wallet-core/ethereum/network';
-import { DEFAULT_RPC_URLS } from '../../../../packages/wallet-core/ethereum/network';
+import type { NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
+import { NETWORK_LIST, getNetworkInfo } from '../../../../packages/wallet-core/ethereum/network';
 import { computed, onMounted, ref } from 'vue';
 
-const networks = [
-  { value: 'syscoin', label: 'Syscoin NEVM' },
-  { value: 'syscoinTestnet', label: 'Syscoin NEVM Testnet' },
-  { value: 'ethereum', label: 'Ethereum' },
-  { value: 'polygon', label: 'Polygon' },
-] as const;
+const networks = NETWORK_LIST;
 
-const network = ref<EvmNetwork>('syscoin');
-const customRpcUrls = ref<Partial<Record<EvmNetwork, string>>>({});
+const network = ref<NetworkKey>('syscoin');
+const customRpcUrls = ref<Partial<Record<NetworkKey, string>>>({});
 const tempRpc = ref<string>('');
-const defaultUrls = DEFAULT_RPC_URLS;
 
 onMounted(async () => {
   // load the saved selection
@@ -95,7 +89,9 @@ async function saveRpc() {
   await setCustomRpcUrl(network.value, tempRpc.value);
 }
 
-const selectedLabel = computed(() => {
-  return networks.find((n) => n.value === network.value)?.label ?? '';
-});
+function defaultUrl(key: NetworkKey): string {
+  return getNetworkInfo(key).rpcUrls[0];
+}
+
+const selectedLabel = computed(() => getNetworkInfo(network.value).label);
 </script>

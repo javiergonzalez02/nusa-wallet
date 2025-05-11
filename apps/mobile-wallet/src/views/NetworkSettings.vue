@@ -95,22 +95,25 @@
             <ion-label position="stacked">Block Explorer URL</ion-label>
             <ion-input v-model="tempCustomNetwork.blockExplorer"/>
           </ion-item>
-          <ion-item>
-            <ion-button expand="block" color="danger" @click="removeCustomNetwork">
-              Delete Network
-            </ion-button>
-          </ion-item>
         </template>
 
-        <!-- Save button -->
+        <!-- Save and Delete Buttons -->
         <ion-item>
-          <ion-button
-              expand="block"
-              @click="saveChanges"
-              :disabled="!hasChanges"
-          >
-            Save
-          </ion-button>
+          <div>
+            <ion-button
+                v-if="isCustom && tempCustomNetwork"
+                color="danger"
+                @click="removeCustomNetwork"
+            >
+              Delete Network
+            </ion-button>
+            <ion-button
+                @click="saveChanges"
+                :disabled="!hasChanges"
+            >
+              Save
+            </ion-button>
+          </div>
         </ion-item>
       </ion-list>
     </ion-content>

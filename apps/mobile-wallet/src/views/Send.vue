@@ -4,9 +4,15 @@
       <ion-list>
         <!-- Asset selector -->
         <ion-item>
-          <ion-select label="Select Asset" label-placement="floating" v-model="selectedAsset">
+          <ion-select
+              label="Select Asset"
+              label-placement="floating"
+              interface="popover"
+              :value="nativeSymbol"
+              v-model="selectedAsset"
+          >
             <!-- Lists native coin -->
-            <ion-select-option value="SYS">SYS</ion-select-option>
+            <ion-select-option :value="nativeSymbol">{{ nativeSymbol }}</ion-select-option>
             <!-- Lists imported ERC‑20 tokens -->
             <ion-select-option
                 v-for="t in tokens"
@@ -40,25 +46,33 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { getAccountDetails, sendERC20, sendTransaction } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
-import { getProvider } from '@/utils/networkUtils';
+import { getProvider, getSelectedNetworkInfo } from '@/utils/networkUtils';
 import { IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, toastController } from '@ionic/vue';
 import BaseLayout from "@/layouts/BaseLayout.vue";
 import { getSeedPhrase } from "@/utils/secureStorage/seed";
 import { addTx } from "@/utils/txHistory";
 import { trackTx } from "@/utils/watchTx";
 import { getImportedTokens } from '@/utils/tokenUtils';
+import { NetworkInfo } from "../../../../packages/wallet-core/ethereum/network";
 
 // Ref variables
 const recipientAddress = ref();           // User input for recipient's address
 const amount = ref();                     // User input for the amount to send
 const loading = ref(false);               // Loading state during transaction process
 const privateKey = ref();                 // Private key of the account
+const nativeSymbol = ref('');             // Reactive variable for the native currency symbol
 const tokens = ref<Array<{ address: string; symbol: string; decimals: number }>>([]);
-const selectedAsset = ref<'SYS' | string>('SYS');      // Native coin or token addr
+const selectedAsset = ref<string>('');    // Native coin or selected token
 
 // fetch key and token list on mount
 onMounted(async() => {
+  loading.value = true;
   try {
+    // Fetch network information to get the native symbol
+    const networkInfo: NetworkInfo = await getSelectedNetworkInfo();
+    nativeSymbol.value = networkInfo.nativeSymbol;
+    selectedAsset.value = networkInfo.nativeSymbol; // Default selected asset to the native currency
+
     const mnemonic = await getSeedPhrase();
     if (!mnemonic) throw new Error('Seed phrase not found');
     const provider = await getProvider();
@@ -73,38 +87,42 @@ onMounted(async() => {
       color: 'danger',
     });
     await toast.present();
+  } finally {
+    loading.value = false;
   }
 });
 
 // Computes the display symbol:
-// returns ‘SYS’ if the native asset is selected; otherwise returns the matching token’s symbol or ‘Token’.
+// returns the native asset if is selected; otherwise returns the matching token’s symbol or ‘Token’.
 const selectedSymbol = computed(() => {
-  if (selectedAsset.value === 'SYS') return 'SYS';
-  const t = tokens.value.find(t => t.address === selectedAsset.value);
-  return t ? t.symbol : 'Token';
+  if (selectedAsset.value === nativeSymbol.value && nativeSymbol.value) {
+    return nativeSymbol.value;
+  }
+  const token = tokens.value.find(t => t.address === selectedAsset.value);
+  return token ? token.symbol : (nativeSymbol.value || 'Asset'); // Fallback if nativeSymbol isn't ready or token not found
 });
 
 // Handles the transaction process
 async function handleTransaction() {
+  // Validate if privateKey is ready
+  if (!privateKey.value || privateKey.value === 'Loading...') throw new Error('Private Key could not be retrieved');
+  if (!recipientAddress.value.trim()) throw new Error('Recipient address is required.');
+  if (!amount.value || isNaN(parseFloat(amount.value.toString().replace(',', '.'))) || parseFloat(amount.value.toString().replace(',', '.')) <= 0) {
+    throw new Error('Please enter a valid positive amount.');
+  }
+  if (!selectedAsset.value) throw new Error('Please select an asset to send.');
+  loading.value = true; // Set loading state
   try {
-    // Validate if privateKey is ready
-    if (!privateKey.value || privateKey.value === 'Loading...') throw new Error('Private Key could not be retrieved');
-    console.log('Amount before parsing:', amount.value);
-    // Check if a valid amount has been entered
-    if (!amount.value) throw new Error('Please enter a valid amount.');
-    loading.value = true; // Set loading state
-
     // Format the amount (replace commas with dots for decimal representation)
     const formattedAmount = amount.value.toString().replace(',', '.');
-    console.log('Amount:', formattedAmount);
 
     // Get provider from network utils
     const provider = await getProvider();
 
     let txResp;
-    let symbol = 'SYS';
+    let transactionSymbolForHistory = nativeSymbol.value; // Default to native symbol
 
-    if (selectedAsset.value === 'SYS') {
+    if (selectedAsset.value === nativeSymbol.value) {
       // Native coin transfer
       txResp = await sendTransaction(
           privateKey.value,
@@ -116,9 +134,7 @@ async function handleTransaction() {
       // ERC-20 transfer
       const token = tokens.value.find(t => t.address === selectedAsset.value);
       if (!token) throw new Error('Token not found');
-
-      symbol = token.symbol;
-
+      transactionSymbolForHistory = token.symbol;
       txResp = await sendERC20(
           privateKey.value,
           token.address,
@@ -129,21 +145,30 @@ async function handleTransaction() {
     }
 
     console.log('Transaction sent:', txResp);
+    const toast = await toastController.create({
+      message: `Transaction sent successfully! Hash: ${txResp.hash.substring(0, 10)}...`,
+      duration: 3000,
+      color: 'success',
+      position: 'top'
+    });
+    await toast.present();
 
+    // Prepare transaction record for local history
     const txRec = {
       hash: txResp.hash,
       from: txResp.from,
       to: txResp.to!,
       amount: formattedAmount,
-      token: symbol,
+      token: transactionSymbolForHistory,
       timestamp: Date.now(),
       status: 'pending' as const
     };
-    addTx(txRec);          // instant UI update
-    trackTx(txRec.hash);
+    addTx(txRec);           // Add to local history for instant UI update
+    trackTx(txRec.hash);  // Start watching the transaction status on-chain
 
-    // UI clean‑up
-    loading.value = false;
+    // Clear input fields after successful transaction
+    recipientAddress.value = '';
+    amount.value = '';
   } catch (error: any) {
     console.error('Error sending transaction:', error);
     alert('Transaction failed: ' + error.message);

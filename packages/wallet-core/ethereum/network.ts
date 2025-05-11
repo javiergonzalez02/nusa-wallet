@@ -48,7 +48,7 @@ export const NETWORK_LIST: readonly NetworkInfo[] = Object.values(NETWORKS);
 export type NetworkKey = keyof typeof NETWORKS;
 
 export interface NetworkInfo {
-  key: NetworkKey;
+  key: string;
   label: string;
   chainId: number;
   nativeSymbol: string;

@@ -68,7 +68,7 @@ export async function getSelectedNetworkInfo(): Promise<NetworkInfo> {
  * @param {NetworkKey} net - The key of the network to be saved as the selected one.
  * @returns {Promise<void>} A promise that resolves when the network selection has been saved.
  */
-export async function setSelectedNetwork(net: NetworkKey): Promise<void> {
+export async function setSelectedNetwork(net: string): Promise<void> {
 	await ready();
 	await storage.set(KEY, net);
 }

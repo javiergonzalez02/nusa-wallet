@@ -6,7 +6,7 @@ export const NETWORKS = {
     label: 'Syscoin NEVM',
     chainId: 57,
     nativeSymbol: 'SYS',
-    rpcUrls: ['https://rpc.syscoin.org'],
+    rpcUrl: 'https://rpc.syscoin.org',
     blockExplorer: 'https://explorer.syscoin.org',
   },
   syscoinTestnet: {
@@ -14,7 +14,7 @@ export const NETWORKS = {
     label: 'Syscoin NEVM testnet',
     chainId: 5700,
     nativeSymbol: 'tSYS',
-    rpcUrls: ['https://rpc.tanenbaum.io'],
+    rpcUrl: 'https://rpc.tanenbaum.io',
     blockExplorer: 'https://tanenbaum.io',
   },
   ethereum: {
@@ -22,7 +22,7 @@ export const NETWORKS = {
     label: 'Ethereum Mainnet',
     chainId: 1,
     nativeSymbol: 'ETH',
-    rpcUrls: ['https://eth.llamarpc.com'],
+    rpcUrl: 'https://eth.llamarpc.com',
     blockExplorer: 'https://etherscan.io',
   },
   ethereumSepolia: {
@@ -30,7 +30,7 @@ export const NETWORKS = {
     label: 'Ethereum Sepolia',
     chainId: 11155111,
     nativeSymbol: 'ETH',
-    rpcUrls: ['https://eth-sepolia.public.blastapi.io'],
+    rpcUrl: 'https://eth-sepolia.public.blastapi.io',
     blockExplorer: 'https://sepolia.etherscan.io',
   },
   polygon: {
@@ -38,7 +38,7 @@ export const NETWORKS = {
     label: 'Polygon',
     chainId: 137,
     nativeSymbol: 'POL',
-    rpcUrls: ['https://polygon-rpc.com'],
+    rpcUrl: 'https://polygon-rpc.com',
     blockExplorer: 'https://polygonscan.com',
   },
 } as const;
@@ -52,7 +52,7 @@ export interface NetworkInfo {
   label: string;
   chainId: number;
   nativeSymbol: string;
-  rpcUrls: readonly string[];
+  rpcUrl: string;
   blockExplorer?: string;
 }
 
@@ -70,7 +70,7 @@ export function getRpcUrl(key: NetworkKey, customRpcUrl?: string): string {
 	if (customRpcUrl && customRpcUrl.trim() !== '') {
 		return customRpcUrl.trim();
 	}
-	return getNetworkInfo(key).rpcUrls[0];
+	return getNetworkInfo(key).rpcUrl;
 }
 
 /**

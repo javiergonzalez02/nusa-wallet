@@ -1,8 +1,9 @@
 import { Storage } from '@ionic/storage';
 import { ethers } from 'ethers';
 import type { NetworkKey, NetworkInfo } from '../../../../packages/wallet-core/ethereum/network';
-import { getProviderForNetwork, getNetworkInfo } from '../../../../packages/wallet-core/ethereum/network';
+import { getProviderForNetwork, NETWORK_LIST } from '../../../../packages/wallet-core/ethereum/network';
 import { getCustomNetworkOverrides } from './networkRpcUtils';
+import { getCustomNetworks } from './customNetwork'
 
 const KEY = 'evm-network';
 const storage = new Storage();
@@ -36,35 +37,30 @@ export async function getSelectedNetwork(): Promise<NetworkKey> {
 export async function getSelectedNetworkInfo(): Promise<NetworkInfo> {
 	// Get stored network selection from persistent storage
 	const key: NetworkKey = await getSelectedNetwork();
+	const predefined = NETWORK_LIST.find(n => n.key === key);
 
-	// Retrieve base network configuration from predefined values
-	const baseInfo = getNetworkInfo(key);
-
-	// Load any existing user customizations for networks
-	const overrides = await getCustomNetworkOverrides();
-
-	// Extract overrides specific to current network, default to empty object if none exist
-	const networkOverrides = overrides[key] || {};
-
-	// Merge configurations with priority handling for critical fields
-	return {
-		// Spread base properties first (default values)
-		...baseInfo,
-
-		// Spread overrides second (user customizations will overwrite defaults)
-		...networkOverrides,
-
-		// Special handling for critical properties:
-		// - Use || for rpcUrl to ensure non-empty string (reject empty override values)
-		rpcUrl: networkOverrides.rpcUrl || baseInfo.rpcUrl,
-
-		// - Use ?? for these fields to accept falsy-but-valid values (0, false, '')
-		// while falling back to defaults only for null/undefined overrides
-		chainId: networkOverrides.chainId ?? baseInfo.chainId,
-		nativeSymbol: networkOverrides.nativeSymbol ?? baseInfo.nativeSymbol,
-		label: networkOverrides.label ?? baseInfo.label,
-		blockExplorer: networkOverrides.blockExplorer ?? baseInfo.blockExplorer,
-	};
+	if (predefined) {
+		// Predefined network with potential overrides
+		const overrides = await getCustomNetworkOverrides();
+		const networkOverrides = overrides[key] || {};
+		return {
+			...predefined,
+			...networkOverrides,
+			rpcUrl: networkOverrides.rpcUrl || predefined.rpcUrl,
+			chainId: networkOverrides.chainId ?? predefined.chainId,
+			nativeSymbol: networkOverrides.nativeSymbol ?? predefined.nativeSymbol,
+			label: networkOverrides.label ?? predefined.label,
+			blockExplorer: networkOverrides.blockExplorer ?? predefined.blockExplorer,
+		};
+	} else {
+		// Custom network
+		const customNetworks = await getCustomNetworks();
+		const customNetwork = customNetworks.find(n => n.key === key);
+		if (customNetwork) {
+			return customNetwork;
+		}
+		throw new Error(`Network with key "${key}" not found.`);
+	}
 }
 
 /**
@@ -92,4 +88,13 @@ export async function getProvider(): Promise<ethers.JsonRpcProvider> {
 	const customRpc: string | undefined = overrides[net]?.rpcUrl;
 	// Create and return a provider, using the custom RPC if available, otherwise the default.
 	return getProviderForNetwork(net, customRpc);
+}
+
+/**
+ * Retrieve a list of all available networks (predefined + custom).
+ */
+export async function getAllNetworkList(): Promise<NetworkInfo[]> {
+	const predefined = NETWORK_LIST;
+	const custom = await getCustomNetworks();
+	return [...predefined, ...custom];
 }

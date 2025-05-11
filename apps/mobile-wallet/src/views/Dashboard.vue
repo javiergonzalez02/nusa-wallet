@@ -97,7 +97,7 @@ import {
   modalController
 } from '@ionic/vue';
 import { getProvider, getSelectedNetworkInfo } from '@/utils/networkUtils';
-import AddTokenModal from '@/components/AddTokenModal.vue';
+import AddToken from '@/components/AddToken.vue';
 import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";
 import { add, copyOutline } from "ionicons/icons";
@@ -197,7 +197,7 @@ async function loadTokens() {
 
 const openAddTokenModal = async() => {
   const modal = await modalController.create({
-    component: AddTokenModal
+    component: AddToken
   });
   modal.onDidDismiss().then(() => loadTokens());
   await modal.present();

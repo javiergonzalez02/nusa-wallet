@@ -148,7 +148,7 @@ async function handleTransaction() {
     const toast = await toastController.create({
       message: `Transaction sent successfully! Hash: ${txResp.hash.substring(0, 10)}...`,
       duration: 3000,
-      color: 'sucess',
+      color: 'success',
       position: 'top'
     });
     await toast.present();

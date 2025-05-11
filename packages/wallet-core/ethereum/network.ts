@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 export const NETWORKS = {
   syscoin: {
     key: 'syscoin',
-    label: 'Syscoin',
+    label: 'Syscoin NEVM',
     chainId: 57,
     nativeSymbol: 'SYS',
     rpcUrls: ['https://rpc.syscoin.org'],
@@ -11,7 +11,7 @@ export const NETWORKS = {
   },
   syscoinTestnet: {
     key: 'syscoinTestnet',
-    label: 'Syscoin NEVM',
+    label: 'Syscoin NEVM testnet',
     chainId: 5700,
     nativeSymbol: 'tSYS',
     rpcUrls: ['https://rpc.tanenbaum.io'],

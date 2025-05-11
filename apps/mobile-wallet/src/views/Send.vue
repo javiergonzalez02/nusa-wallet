@@ -106,7 +106,7 @@ const selectedSymbol = computed(() => {
 async function handleTransaction() {
   // Validate if privateKey is ready
   if (!privateKey.value || privateKey.value === 'Loading...') throw new Error('Private Key could not be retrieved');
-  if (!recipientAddress.value.trim()) throw new Error('Private Key is not available. Wallet may not be initialized correctly.');
+  if (!recipientAddress.value.trim()) throw new Error('Recipient address is required.');
   if (!amount.value || isNaN(parseFloat(amount.value.toString().replace(',', '.'))) || parseFloat(amount.value.toString().replace(',', '.')) <= 0) {
     throw new Error('Please enter a valid positive amount.');
   }

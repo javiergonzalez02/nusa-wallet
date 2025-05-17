@@ -26,7 +26,11 @@
         <!-- Input for the recipient address -->
         <ion-item>
           <ion-label position="stacked">Recipient Address</ion-label>
-          <ion-input v-model="recipientAddress" placeholder="0x..."></ion-input>
+          <ion-input v-model="recipientAddress" placeholder="0x...">
+            <qrScanner
+            slot="end"
+            @scanned="onScanned"/>
+          </ion-input>
         </ion-item>
         <!-- Input for the transaction amount -->
         <ion-item>
@@ -54,6 +58,7 @@ import { addTx } from "@/utils/txHistory";
 import { trackTx } from "@/utils/watchTx";
 import { getImportedTokens } from '@/utils/tokenUtils';
 import { NetworkInfo } from "../../../../packages/wallet-core/ethereum/network";
+import QrScanner from "@/components/qrScanner.vue";
 
 // Ref variables
 const recipientAddress = ref();           // User input for recipient's address
@@ -101,6 +106,13 @@ const selectedSymbol = computed(() => {
   const token = tokens.value.find(t => t.address === selectedAsset.value);
   return token ? token.symbol : (nativeSymbol.value || 'Asset'); // Fallback if nativeSymbol isn't ready or token not found
 });
+
+// When 'scanned' event is emitted by the scanner, assign the value to the recipientAddress
+function onScanned(value: string | undefined) {
+  if (value) {
+    recipientAddress.value = value
+  }
+}
 
 // Handles the transaction process
 async function handleTransaction() {

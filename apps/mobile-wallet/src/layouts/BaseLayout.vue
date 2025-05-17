@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
+      <ion-toolbar color="primary">
         <ion-buttons slot="start">
           <!-- only show if the page asked for it -->
           <ion-back-button v-if="showBack" :default-href="defaultHref"/>

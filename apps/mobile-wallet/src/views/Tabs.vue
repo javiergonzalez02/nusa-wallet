@@ -11,6 +11,10 @@
           <ion-icon :icon="paperPlaneOutline"/>
           <ion-label>Send</ion-label>
         </ion-tab-button>
+        <ion-tab-button tab="receive" @click="openReceiveModal">
+          <ion-icon :icon="qrCodeOutline"/>
+          <ion-label>Receive</ion-label>
+        </ion-tab-button>
         <ion-tab-button tab="settings" href="/tabs/settings">
           <ion-icon :icon="settingsOutline"/>
           <ion-label>Settings</ion-label>
@@ -22,14 +26,27 @@
 
 <script setup lang="ts">
 import {
+  IonIcon,
+  IonLabel,
   IonPage,
-  IonTabs,
+  IonRouterOutlet,
   IonTabBar,
   IonTabButton,
-  IonRouterOutlet,
-  IonLabel,
-  IonIcon
+  IonTabs,
+  modalController
 } from '@ionic/vue';
-import { speedometerOutline, settingsOutline, paperPlaneOutline } from 'ionicons/icons';
+import { paperPlaneOutline, qrCodeOutline, settingsOutline, speedometerOutline } from 'ionicons/icons';
+import Receive from "@/components/Receive.vue";
+import { useAccountStore } from "@/stores/accountStore";
+
+const accountStore = useAccountStore();
+
+const openReceiveModal = async() => {
+  const modal = await modalController.create({
+    component: Receive,
+    componentProps: { address: accountStore.account }
+  });
+  await modal.present();
+};
 
 </script>

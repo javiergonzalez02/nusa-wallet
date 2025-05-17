@@ -18,7 +18,7 @@
               </ion-col>
             </ion-row>
           </ion-grid>
-          <p>Balance: {{ accountBalance }} {{nativeSymbol}}</p>
+          <p>Balance: {{ accountBalance }} {{ nativeSymbol }}</p>
         </ion-card-content>
       </ion-card>
       <ion-segment v-model="segment" color="primary">
@@ -35,7 +35,7 @@
           <ion-list v-if="transactions.length">
             <ion-item v-for="tx in transactions" :key="tx.hash" lines="full">
               <ion-label>
-                <h3>{{ tx.amount }} {{nativeSymbol}} → {{ tx.to }}</h3>
+                <h3>{{ tx.amount }} {{ nativeSymbol }} → {{ tx.to }}</h3>
                 <p>{{ new Date(tx.timestamp).toLocaleString() }}</p>
               </ion-label>
               <!-- simple status pill -->
@@ -81,20 +81,20 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
 import { fetchTokenBalance, getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import {
+  IonCol,
   IonContent,
+  IonFab,
+  IonFabButton,
+  IonGrid,
+  IonIcon,
   IonItem,
   IonLabel,
   IonList,
+  IonRow,
   IonSegment,
   IonSegmentButton,
-  IonIcon,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonFab,
-  IonFabButton,
-  toastController,
-  modalController
+  modalController,
+  toastController
 } from '@ionic/vue';
 import { getProvider, getSelectedNetworkInfo } from '@/utils/networkUtils';
 import AddToken from '@/components/AddToken.vue';
@@ -106,6 +106,7 @@ import { resumeTxWatchers } from '@/utils/watchTx';
 import { watchBalance } from '@/utils/watchBalance';
 import { formatEther } from "ethers";
 import { NetworkInfo } from "../../../../packages/wallet-core/ethereum/network";
+import { useAccountStore } from "@/stores/accountStore";
 
 const tokens = ref<Array<{ address: string; symbol: string; name: string; decimals: number; balance: string }>>([]);
 
@@ -135,17 +136,18 @@ onMounted(async() => {
       accountAddress.value = address;
       accountPrivateKey.value = privateKey;
       accountBalance.value = balance !== null ? balance : 'Error fetching balance';
+      useAccountStore().setAccount(address);
       await loadTokens();
       await initTxHistory();     // load + make reactive
       await resumeTxWatchers();  // restart any pending watchers
       // Start watching the on‑chain balance of the account
-    stopBalanceWatch = await watchBalance(
-      accountAddress.value,
-      (wei) => {
-        // Update the reactive balance when a new block arrives
-        accountBalance.value = formatEther(wei);
-      }
-    );
+      stopBalanceWatch = await watchBalance(
+          accountAddress.value,
+          (wei) => {
+            // Update the reactive balance when a new block arrives
+            accountBalance.value = formatEther(wei);
+          }
+      );
     } else {
       accountAddress.value = 'Mnemonic not found';
       accountPrivateKey.value = 'Mnemonic not found';

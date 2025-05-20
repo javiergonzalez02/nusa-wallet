@@ -33,7 +33,17 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { modalController } from '@ionic/vue';
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonButton,
+  IonContent,
+  IonItem,
+  IonInput,
+  modalController
+} from '@ionic/vue';
 import { getProvider } from '@/utils/networkUtils';
 import { fetchTokenMetadata } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import { addImportedToken } from '@/utils/tokenUtils';

@@ -134,7 +134,7 @@ import {
 } from '@ionic/vue';
 import BaseLayout from '@/layouts/BaseLayout.vue';
 import { getAllNetworkList, getSelectedNetwork, setSelectedNetwork } from '@/utils/networkUtils';
-import { getCustomNetworkOverrides, setCustomNetworkOverride } from '@/utils/networkRpcUtils';
+import { getCustomNetworkOverrides, setCustomNetworkOverride } from '@/utils/customNetworkOverride';
 import { addCustomNetwork, deleteCustomNetwork, getCustomNetworks, updateCustomNetwork } from '@/utils/customNetwork';
 import type { NetworkInfo, NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
 import { getNetworkInfo, NETWORK_LIST } from '../../../../packages/wallet-core/ethereum/network';

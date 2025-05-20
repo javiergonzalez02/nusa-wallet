@@ -2,7 +2,7 @@ import { Storage } from '@ionic/storage';
 import { ethers } from 'ethers';
 import type { NetworkKey, NetworkInfo } from '../../../../packages/wallet-core/ethereum/network';
 import { getProviderForNetwork, NETWORK_LIST } from '../../../../packages/wallet-core/ethereum/network';
-import { getCustomNetworkOverrides } from './networkRpcUtils';
+import { getCustomNetworkOverrides } from './customNetworkOverride';
 import { getCustomNetworks } from './customNetwork'
 
 const KEY = 'evm-network';

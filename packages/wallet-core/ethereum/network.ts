@@ -15,7 +15,7 @@ export const NETWORKS = {
     chainId: 5700,
     nativeSymbol: 'tSYS',
     rpcUrl: 'https://rpc.tanenbaum.io',
-    blockExplorer: 'https://tanenbaum.io',
+    blockExplorer: 'https://explorer.tanenbaum.io',
   },
   ethereum: {
     key: 'ethereum',

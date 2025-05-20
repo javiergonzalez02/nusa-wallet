@@ -35,7 +35,7 @@
           <ion-list v-if="transactions.length">
             <ion-item v-for="tx in transactions" :key="tx.hash" lines="full">
               <ion-label>
-                <h3>{{ tx.amount }} {{ nativeSymbol }} → {{ tx.to }}</h3>
+                <h3>{{ tx.amount }} {{ tx.symbol }} → {{ tx.to }}</h3>
                 <p>{{ new Date(tx.timestamp).toLocaleString() }}</p>
               </ion-label>
               <!-- simple status pill -->

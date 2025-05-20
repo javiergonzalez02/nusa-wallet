@@ -12,7 +12,7 @@ export interface TxRecord {
 	from: string;       // sender address
 	to: string;         // recipient address
 	amount: string;     // string-formatted ETH/SYS amount (e.g., "0.05")
-	token: string;      // asset ticker, like "SYS" or "USDC"
+	symbol: string;      // asset ticker, like "SYS" or "USDC"
 	timestamp: number;  // submission time in ms (from Date.now())
 	status: TxStatus;   // current status
 }

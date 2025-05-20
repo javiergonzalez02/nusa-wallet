@@ -170,7 +170,7 @@ async function handleTransaction() {
       from: txResp.from,
       to: txResp.to!,
       amount: formattedAmount,
-      token: transactionSymbolForHistory,
+      symbol: transactionSymbolForHistory,
       timestamp: Date.now(),
       status: 'pending' as const
     };

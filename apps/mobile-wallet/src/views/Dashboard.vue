@@ -33,10 +33,17 @@
       <template v-if="segment === 'activity'">
         <section class="activity-section">
           <ion-list v-if="transactions.length">
-            <ion-item v-for="tx in transactions" :key="tx.hash" lines="full">
+            <ion-item v-for="tx in transactions" :key="tx.hash" lines="inset">
               <ion-label>
-                <h3>{{ tx.amount }} {{ tx.symbol }} → {{ tx.to }}</h3>
+                <h3>SENT {{ tx.amount }} {{ tx.symbol }} to {{ tx.to }}</h3>
                 <p>{{ new Date(tx.timestamp).toLocaleString() }}</p>
+                <ion-button
+                    fill="clear"
+                    @click="openExplorer(tx.hash)"
+                    size="small"
+                >
+                  View on Explorer
+                </ion-button>
               </ion-label>
               <!-- simple status pill -->
               <ion-badge slot="end" :color="{ pending:'medium', confirmed:'success', failed:'danger' }[tx.status]">
@@ -91,6 +98,9 @@ import {
   IonLabel,
   IonList,
   IonRow,
+  IonBadge,
+  IonButton,
+  IonText,
   IonSegment,
   IonSegmentButton,
   modalController,
@@ -119,6 +129,7 @@ const accountPrivateKey = ref('Loading...');
 const accountBalance = ref('Loading...');
 const nativeSymbol = ref(''); // Reactive variable for the native currency symbol
 const transactions = useTxHistory();
+const blockExplorerBase = ref();
 // Holds the disposer function for the active balance watcher, or undefined if no watcher is running
 let stopBalanceWatch: (() => void) | undefined;
 
@@ -130,6 +141,7 @@ onMounted(async() => {
       // Fetch network information to get the native symbol
       const networkInfo: NetworkInfo = await getSelectedNetworkInfo();
       nativeSymbol.value = networkInfo.nativeSymbol;
+      blockExplorerBase.value = networkInfo.blockExplorer;
       // Provider for the selected network
       const provider = await getProvider();
       const { address, privateKey, balance } = await getAccountDetails(mnemonic, provider);
@@ -208,6 +220,14 @@ const openAddTokenModal = async() => {
 async function removeToken(addr: string) {
   await removeImportedToken(addr);
   await loadTokens();
+}
+
+function openExplorer(txHash: string) {
+  if (!blockExplorerBase.value) {
+    alert('Set a block explorer for this chain in order to view the tx.')
+  }
+  const url = `${blockExplorerBase.value}/tx/${txHash}`;
+  window.open(url, '_blank', 'noopener');
 }
 </script>
 

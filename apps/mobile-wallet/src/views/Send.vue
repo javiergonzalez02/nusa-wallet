@@ -8,7 +8,6 @@
               label="Select Asset"
               label-placement="floating"
               interface="popover"
-              :value="nativeSymbol"
               v-model="selectedAsset"
           >
             <!-- Lists native coin -->
@@ -51,7 +50,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { getAccountDetails, sendERC20, sendTransaction } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import { getProvider, getSelectedNetworkInfo } from '@/utils/networkUtils';
-import { IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, toastController } from '@ionic/vue';
+import { IonButton, IonContent, IonSelect, IonSelectOption, IonInput, IonItem, IonLabel, IonList, toastController } from '@ionic/vue';
 import BaseLayout from "@/layouts/BaseLayout.vue";
 import { getSeedPhrase } from "@/utils/secureStorage/seed";
 import { addTx } from "@/utils/txHistory";

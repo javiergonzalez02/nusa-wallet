@@ -109,3 +109,12 @@ export async function updateStatus(hash: string, s: TxStatus) {
 		await persist();
 	}
 }
+
+/**
+ * Delete tx history. Useful for when a seed phrase is deleted.
+ */
+export async function clearTxHistory() {
+  await ready();
+  await storage.remove(KEY);
+	list.value = [];
+}

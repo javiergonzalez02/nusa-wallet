@@ -42,6 +42,7 @@ import { IonAlert, IonButton, IonContent, IonItem, IonList } from '@ionic/vue';
 import { getSeedPhrase, removeSeedPhrase } from '@/utils/secureStorage/seed';
 import BaseLayout from '@/layouts/BaseLayout.vue';
 import router from "@/router";
+import { clearTxHistory } from "@/utils/txHistory";
 
 // Define alert buttons with designated roles and handlers
 const alertButtons = [
@@ -59,6 +60,7 @@ const alertButtons = [
       const seed = await getSeedPhrase();
       if (seed) {
         await removeSeedPhrase();
+        await clearTxHistory();
         console.log('Seed phrase deleted');  // Log deletion outcome
       } else {
         console.log('No seed phrase found; nothing to remove.');  // Log absence of seed phrase

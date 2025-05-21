@@ -32,7 +32,7 @@
         <ion-item v-if="isPredefined">
           <ion-label position="stacked">Label</ion-label>
           <ion-input
-              v-model="tempOverrides.label"
+              v-model.trim="tempOverrides.label"
               :placeholder="defaultNetwork.label"
           />
         </ion-item>
@@ -47,14 +47,14 @@
         <ion-item v-if="isPredefined">
           <ion-label position="stacked"> Native Symbol</ion-label>
           <ion-input
-              v-model="tempOverrides.nativeSymbol"
+              v-model.trim="tempOverrides.nativeSymbol"
               :placeholder="defaultNetwork.nativeSymbol"
           />
         </ion-item>
         <ion-item v-if="isPredefined">
           <ion-label position="stacked">RPC URL</ion-label>
           <ion-input
-              v-model="tempRpcUrl"
+              v-model.trim="tempRpcUrl"
               :placeholder="defaultNetwork.rpcUrl"
               type="url"
           />
@@ -65,7 +65,7 @@
         <ion-item v-if="isPredefined">
           <ion-label position="stacked">Block Explorer URL</ion-label>
           <ion-input
-              v-model="tempOverrides.blockExplorer"
+              v-model.trim="tempOverrides.blockExplorer"
               :placeholder="defaultNetwork.blockExplorer"
           />
         </ion-item>
@@ -74,19 +74,19 @@
         <template v-if="isCustom && tempCustomNetwork">
           <ion-item>
             <ion-label position="stacked">Label</ion-label>
-            <ion-input v-model="tempCustomNetwork.label"/>
+            <ion-input v-model.trim="tempCustomNetwork.label"/>
           </ion-item>
           <ion-item>
             <ion-label position="stacked">Chain ID</ion-label>
-            <ion-input :value="tempCustomNetwork.chainId"/>
+            <ion-input v-model.trim="tempCustomNetwork.chainId"/>
           </ion-item>
           <ion-item>
             <ion-label position="stacked">Native Symbol</ion-label>
-            <ion-input v-model="tempCustomNetwork.nativeSymbol"/>
+            <ion-input v-model.trim="tempCustomNetwork.nativeSymbol"/>
           </ion-item>
           <ion-item>
             <ion-label position="stacked">RPC URL</ion-label>
-            <ion-input v-model="tempCustomNetwork.rpcUrl" type="url"/>
+            <ion-input v-model.trim="tempCustomNetwork.rpcUrl" type="url"/>
             <ion-note v-if="rpcError" color="danger" class="ion-padding-start">
               {{ rpcError }}
             </ion-note>
@@ -138,7 +138,7 @@ import { getCustomNetworkOverrides, setCustomNetworkOverride } from '@/utils/cus
 import { addCustomNetwork, deleteCustomNetwork, getCustomNetworks, updateCustomNetwork } from '@/utils/customNetwork';
 import type { NetworkInfo, NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
 import { getNetworkInfo, NETWORK_LIST } from '../../../../packages/wallet-core/ethereum/network';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref, toRaw } from 'vue';
 import CreateCustomNetwork from "@/components/CreateCustomNetwork.vue";
 
 // Initialize reactive references for network data
@@ -214,15 +214,15 @@ async function onNetworkChange() {
 // Update temporary fields based on network type
 async function updateTempFields() {
   if (isPredefined.value) {
-    // Set temporary overrides for predefined networks
-    tempOverrides.value = { ...customOverrides.value[selectedNetwork.value] };
-    tempRpcUrl.value = tempOverrides.value.rpcUrl || '';
+    const overrides = customOverrides.value[selectedNetwork.value] ?? {};
+    tempOverrides.value = reactive({ ...defaultNetwork.value, ...overrides, });
+    tempRpcUrl.value = overrides.rpcUrl ?? defaultNetwork.value.rpcUrl;
     tempCustomNetwork.value = null;
   } else {
     // Load custom network data
     const customNetworks = await getCustomNetworks();
     const custom = customNetworks.find((n) => n.key === selectedNetwork.value);
-    tempCustomNetwork.value = custom ? { ...custom } : null;
+    tempCustomNetwork.value = custom ? reactive({ ...custom }) : null;
     tempRpcUrl.value = '';
   }
 }
@@ -253,7 +253,7 @@ async function saveChanges() {
       return;
     }
     // Update custom network
-    await updateCustomNetwork(selectedNetwork.value, tempCustomNetwork.value);
+    await updateCustomNetwork(selectedNetwork.value, toRaw(tempCustomNetwork.value!));
   }
   // Refresh overrides and network list
   customOverrides.value = await getCustomNetworkOverrides();

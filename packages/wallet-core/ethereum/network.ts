@@ -55,23 +55,6 @@ export interface NetworkInfo {
 }
 
 /**
- * Fetch the full NetworkInfo object by key.
- */
-export function getNetworkInfo(key: NetworkKey): NetworkInfo {
-  return NETWORKS[key];
-}
-
-/**
- * Returns either the custom RPC (if provided & non‐empty), or falls back to default rpc.
- */
-export function getRpcUrl(key: NetworkKey, customRpcUrl?: string): string {
-	if (customRpcUrl && customRpcUrl.trim() !== '') {
-		return customRpcUrl.trim();
-	}
-	return getNetworkInfo(key).rpcUrl;
-}
-
-/**
  * Build a JsonRpcProvider just by an RPC url passed by param.
  */
 export function buildProvider(rpcUrl: string) {

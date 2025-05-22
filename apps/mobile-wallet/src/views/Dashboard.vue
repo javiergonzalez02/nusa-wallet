@@ -121,6 +121,7 @@ import { watchBalance } from '@/utils/watchBalance';
 import { formatEther } from "ethers";
 import { useAccountStore } from "@/stores/accountStore";
 import { useOnNetworkChange } from '@/composables/useOnNetworkChange';
+import { watchTokenBalances } from "@/utils/watchTokenBalance";
 
 // Track imported tokens
 const tokens = ref<Array<{ address: string; symbol: string; name: string; decimals: number; balance: string }>>([]);
@@ -141,7 +142,8 @@ const blockExplorerBase = computed(() => net.selectedInfo.blockExplorer);
 const nativeSymbol = computed(() => net.selectedInfo.nativeSymbol);
 // Store loaded mnemonic and balance watcher stopper
 let mnemonic = '';
-let stopBalanceWatch: (() => void) | undefined;
+let stopNativeBalanceWatch: (() => void) | undefined;
+let stopTokenWatch: (() => void) | undefined;
 
 // Initialize component on mount
 onMounted(async() => {
@@ -162,8 +164,9 @@ useOnNetworkChange(refreshForNetwork);
 
 // Cleanup on unmount
 onUnmounted(() => {
-  // Stop balance watcher
-  stopBalanceWatch?.();
+  // Stop balance watchers
+  stopNativeBalanceWatch?.();
+  stopTokenWatch?.();
 });
 
 /**
@@ -180,12 +183,25 @@ async function refreshForNetwork() {
     useAccountStore().setAccount(accountAddress.value);
     // Reload token balances
     await loadTokens();
-    // Restart balance watcher
-    stopBalanceWatch?.();
-    stopBalanceWatch = await watchBalance(
+    // Restart native balance watcher
+    stopNativeBalanceWatch?.();
+    stopNativeBalanceWatch = await watchBalance(
         accountAddress.value,
         (wei) => {
           accountBalance.value = formatEther(wei);
+        }
+    );
+    // Restart ERC-20 balance watcher
+    stopTokenWatch?.();
+    const imported = await getImportedTokens();
+    stopTokenWatch = await watchTokenBalances(
+        accountAddress.value,
+        imported,
+        (balances) => {
+          tokens.value = tokens.value.map(t => ({
+            ...t,
+            balance: balances[t.address] ?? t.balance
+          }));
         }
     );
     // Resume pending tx watchers

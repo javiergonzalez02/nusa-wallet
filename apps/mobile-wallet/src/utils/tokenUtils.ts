@@ -1,6 +1,6 @@
 import { Storage } from '@ionic/storage';
 import type { NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
-import { getSelectedNetwork } from './networkUtils';
+import { getSelectedNetwork } from './network';
 
 /**
  * A token imported by the user.
@@ -36,7 +36,7 @@ async function ready() {
  */
 export async function getImportedTokens(): Promise<ImportedToken[]> {
   await ready();
-  const net = await getSelectedNetwork();
+  const net = getSelectedNetwork();
   const all = (await storage.get(STORAGE_KEY)) as Record<NetworkKey, ImportedToken[]> || {};
   return all[net] || [];
 }
@@ -68,7 +68,7 @@ export async function addImportedToken(token: ImportedToken): Promise<void> {
  */
 export async function removeImportedToken(address: string): Promise<void> {
   await ready();
-  const net = await getSelectedNetwork();
+  const net = getSelectedNetwork();
   const all = (await storage.get(STORAGE_KEY)) as Record<NetworkKey, ImportedToken[]> || {};
   all[net] = (all[net] || []).filter(t => t.address.toLowerCase() !== address.toLowerCase());
   await storage.set(STORAGE_KEY, all);

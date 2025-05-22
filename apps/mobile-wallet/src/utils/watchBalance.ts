@@ -1,4 +1,4 @@
-import { getProvider } from '@/utils/networkUtils';
+import { getProvider } from '@/utils/network';
 
 export type BalanceCallback = (wei: bigint) => void;
 
@@ -24,7 +24,7 @@ export async function watchBalance(
   if (currentOff) currentOff();
 
   // It obtains a provider for the network and sets the polling interval
-  const provider = await getProvider();
+  const provider = getProvider();
   provider.pollingInterval = minDelay;
 
   /**

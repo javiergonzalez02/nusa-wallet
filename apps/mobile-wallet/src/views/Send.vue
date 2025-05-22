@@ -59,6 +59,7 @@ import {
   IonList,
   IonSelect,
   IonSelectOption,
+  alertController,
   toastController
 } from '@ionic/vue';
 import BaseLayout from "@/layouts/BaseLayout.vue";
@@ -137,7 +138,7 @@ function onScanned(value: string | undefined) {
 }
 
 /**
- * Validate inputs and send transaction
+ * Validate inputs and ask user for confirmation
  */
 async function handleTransaction() {
   // Validate if privateKey is ready
@@ -146,12 +147,34 @@ async function handleTransaction() {
   const amt = parseFloat(amount.value.replace(',', '.'));
   if (isNaN(amt) || amt <= 0) throw new Error('Enter a valid positive amount');
   if (!selectedAsset.value) throw new Error('Please select an asset to send.');
+  // Format the amount (replace commas with dots for decimal representation)
+  const formattedAmount = amount.value.toString().replace(',', '.');
+
+  // Show confirm alert
+  const alert = await alertController.create({
+    header: 'Confirm Transaction',
+    subHeader: `${formattedAmount} ${selectedSymbol.value} → ${recipientAddress.value}`,
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Confirm',
+        handler: () => {
+          performSend(formattedAmount);
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+}
+
+/**
+ * Send transaction
+ */
+async function performSend(formattedAmount: string) {
   loading.value = true; // Set loading state
   try {
-    // Format the amount (replace commas with dots for decimal representation)
-    const formattedAmount = amount.value.toString().replace(',', '.');
     let txResp;
-    let symbolForHistory = nativeSymbol.value; // Default to native symbol
 
     if (selectedAsset.value === nativeSymbol.value) {
       // Native coin transfer
@@ -165,7 +188,6 @@ async function handleTransaction() {
       // ERC-20 transfer
       const token = tokens.value.find(t => t.address === selectedAsset.value);
       if (!token) throw new Error('Token not found');
-      symbolForHistory = token.symbol;
       txResp = await sendERC20(
           privateKey.value,
           token.address,
@@ -183,7 +205,7 @@ async function handleTransaction() {
       from: txResp.from,
       to: txResp.to!,
       amount: formattedAmount,
-      symbol: symbolForHistory,
+      symbol: selectedSymbol.value,
       timestamp: Date.now(),
       status: 'pending' as const
     };
@@ -197,7 +219,7 @@ async function handleTransaction() {
     console.error('Error sending transaction:', error);
     alert('Transaction failed: ' + error.message);
   } finally {
-    loading.value = false; // Reset loading state after processing
+    loading.value = false;
   }
 }
 

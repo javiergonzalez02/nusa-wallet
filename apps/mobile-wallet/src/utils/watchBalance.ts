@@ -12,13 +12,13 @@ let currentOff: (() => void) | null = null;
  *
  * @param address - The Ethereum address whose balance is being watched.
  * @param onChange - The callback to invoke with the balance (in wei) on each update.
- * @param minDelay - The minimum delay (in milliseconds) between balance checks (default: 5000).
+ * @param minDelay - The minimum delay (in milliseconds) between balance checks (default: 2000).
  * @returns A function that stops watching the balance when invoked.
  */
 export async function watchBalance(
   address: string,
   onChange: BalanceCallback,
-  minDelay = 5000
+  minDelay = 2000
 ): Promise<() => void> {
   // It stops any existing balance watcher before starting a new one
   if (currentOff) currentOff();

@@ -15,14 +15,14 @@ let currentTokenBalanceWatchOff: (() => void) | null = null;
  * @param address - The Ethereum address whose balance is being watched.
  * @param tokens - Array of ImportedToken { address, decimals, … }
  * @param onChange - The callback to invoke with the balance (in wei) on each update.
- * @param minDelay - The minimum delay (in milliseconds) between balance checks (default: 5000).
+ * @param minDelay - The minimum delay (in milliseconds) between balance checks (default: 2000).
  * @returns A function that stops watching the balance when invoked.
  */
 export async function watchTokenBalances(
 		address: string,
 		tokens: ImportedToken[],
 		onChange: TokenBalanceCallback,
-		minDelay = 5000
+		minDelay = 2000
 ): Promise<() => void> {
 	// It stops any existing balance watcher before starting a new one
 	if (currentTokenBalanceWatchOff) currentTokenBalanceWatchOff();

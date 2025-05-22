@@ -43,8 +43,6 @@ export const NETWORKS = {
   },
 } as const;
 
-export const NETWORK_LIST: readonly NetworkInfo[] = Object.values(NETWORKS);
-
 export type NetworkKey = keyof typeof NETWORKS;
 
 export interface NetworkInfo {

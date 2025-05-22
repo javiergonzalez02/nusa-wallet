@@ -1,6 +1,7 @@
 import { Storage } from '@ionic/storage';
 import { defineStore } from 'pinia';
-import { reactive, computed, watch, ref } from 'vue';
+import { reactive, computed, watch, ref, toRaw } from 'vue';
+
 import {
 	NETWORKS,
 	buildProvider,
@@ -27,15 +28,34 @@ export const useNetworkStore = defineStore('networks', () => {
 	const ready = ref(false);
 	// Initialize storage and load saved configuration
 	(async() => {
-		await storage.create();
-		// Load the saved 'netconf' (custom + overrides)
-		const raw = await storage.get('netconf');
-		if (raw && typeof raw === 'object') Object.assign(state, raw);
+		try {
+			await storage.create();
+			// Load the saved 'netconf' (custom + overrides)
+			const raw = await storage.get('netconf');
+			if (raw && typeof raw === 'object') Object.assign(state, raw);
 
-		// Load the last‐selected network key (fallback to DEFAULT_STATE.selected)
-    const last = await storage.get('selectedNetwork') as NetworkKey | null;
-    state.selected = last ?? DEFAULT_STATE.selected;
-		ready.value = true;
+			// Load the last‐selected network key (fallback to DEFAULT_STATE.selected)
+			const last = await storage.get('selectedNetwork') as NetworkKey | null;
+			state.selected = last ?? DEFAULT_STATE.selected;
+			ready.value = true;
+
+			// Persist state changes to storage after storage is ready
+			watch(state, async() => {
+				try {
+					// Extract plain object from reactive state
+					const plainState = toRaw(state);
+					console.log('Attempting to save state:', JSON.stringify(plainState));
+					// Ensure data is serializable
+					JSON.stringify(plainState); // Throws if not serializable
+					await storage.set('netconf', plainState);
+					console.log('State saved via watcher');
+				} catch (error: any) {
+					console.error('Failed to save netconf via watcher:', error.message, error.stack);
+				}
+			}, { deep: true });
+		} catch (error) {
+			console.error('Failed to initialize storage:', error);
+		}
 	})();
 
 	// Reference built-in network definitions
@@ -91,9 +111,6 @@ export const useNetworkStore = defineStore('networks', () => {
 		if (Object.keys(p).length === 0) delete state.overrides[k];
 		else state.overrides[k] = { ...state.overrides[k], ...p };
 	}
-
-	// Persist state changes to storage
-	watch(state, v => storage.set('netconf', v), { deep: true });
 
 	return {
 		selected,

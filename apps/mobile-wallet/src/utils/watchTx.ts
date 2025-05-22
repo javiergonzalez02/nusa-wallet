@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { updateStatus, useTxHistory } from './txHistory';
-import { getProvider } from './networkUtils';
+import { getProvider } from './network';
 
 // Ensure there is a provider bound to the current network
 let provider: ethers.JsonRpcProvider;
@@ -12,7 +12,7 @@ let provider: ethers.JsonRpcProvider;
  *   • Network change
  */
 export async function resumeTxWatchers() {
-	provider = provider ?? await getProvider();
+	provider = getProvider();
 	const pending = useTxHistory().value.filter(t => t.status === 'pending');
 	for (const tx of pending) trackTx(tx.hash);
 }
@@ -36,7 +36,7 @@ export function trackTx(hash: string) {
 		try {
 			const receipt = await provider.getTransactionReceipt(hash);
 			if (!receipt) return;                       // still pending
-			updateStatus(hash, receipt.status === 1 ? 'confirmed' : 'failed');
+			await updateStatus(hash, receipt.status === 1 ? 'confirmed' : 'failed');
 
 			// Done: no more need to listen for visibility changes
 			window.removeEventListener('visibilitychange', checkReceipt);

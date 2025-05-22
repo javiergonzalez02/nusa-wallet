@@ -44,7 +44,7 @@ import {
   IonInput,
   modalController
 } from '@ionic/vue';
-import { getProvider } from '@/utils/networkUtils';
+import { getProvider } from '@/utils/network';
 import { fetchTokenMetadata } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import { addImportedToken } from '@/utils/tokenUtils';
 import { isAddress } from 'ethers';

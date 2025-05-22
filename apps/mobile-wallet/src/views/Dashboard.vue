@@ -149,6 +149,8 @@ onMounted(async() => {
   mnemonic = (await getSeedPhrase()) ?? '';
   // Fetch account address
   accountAddress.value = getAddressFromMnemonic(mnemonic);
+  // Wait for network store to be ready before loading data
+  await waitForNetworkReady();
   // Load persisted tx history
   await initTxHistory();
   // Watch for network changes in tx history
@@ -193,6 +195,15 @@ async function refreshForNetwork() {
     // Display error state
     accountAddress.value = 'Error';
     accountBalance.value = 'Error';
+  }
+}
+
+/**
+ * Waits until the network flag ready is set to true
+ */
+async function waitForNetworkReady() {
+  while (!net.ready) {
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 }
 

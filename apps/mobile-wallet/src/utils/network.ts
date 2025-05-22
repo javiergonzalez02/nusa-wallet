@@ -28,8 +28,13 @@ export const useNetworkStore = defineStore('networks', () => {
 	// Initialize storage and load saved configuration
 	(async() => {
 		await storage.create();
+		// Load the saved 'netconf' (custom + overrides)
 		const raw = await storage.get('netconf');
 		if (raw && typeof raw === 'object') Object.assign(state, raw);
+
+		// Load the last‐selected network key (fallback to DEFAULT_STATE.selected)
+    const last = await storage.get('selectedNetwork') as NetworkKey | null;
+    state.selected = last ?? DEFAULT_STATE.selected;
 		ready.value = true;
 	})();
 
@@ -63,6 +68,7 @@ export const useNetworkStore = defineStore('networks', () => {
 	// Select a network by key
 	function select(k: string) {
 		selected.value = k;
+		storage.set('selectedNetwork', k);
 	}
 
 	// Add a custom network

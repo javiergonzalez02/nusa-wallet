@@ -35,10 +35,11 @@ export function useOnNetworkChange(
 	// 2) Ensure effect also runs once when the component is mounted
 	onMounted(run);
 
-	// 3) Main watcher: observe changes to the selected network key,
-	//    and run effect each time the user switches networks.
+	// 3) Main watcher: observe changes to the NetworkInfo object,
+	// and run effect each time the user switches networks or modifies any network details
 	return watch(
-			() => net.selected,            // watch the "selected" network key
+			() => net.selectedInfo,     // watch the entire selectedInfo object
 			run,                           // invoke effect on every change
+			{ deep: true }
 	);
 }

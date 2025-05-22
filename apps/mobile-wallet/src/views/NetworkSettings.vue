@@ -6,7 +6,6 @@
         <ion-item>
           <ion-select
               v-model="selectedNetwork"
-              @ionChange="onNetworkChange"
               label="Network"
               placeholder="Select network"
               label-placement="floating"
@@ -29,289 +28,217 @@
         </ion-item>
 
         <!-- Editable Network Fields -->
-        <ion-item v-if="isPredefined">
+        <ion-item>
           <ion-label position="stacked">Label</ion-label>
-          <ion-input
-              v-model.trim="tempOverrides.label"
-              :placeholder="defaultNetwork.label"
-          />
+          <ion-input v-model.trim="workingCopy.label" :placeholder="base.label"/>
         </ion-item>
-        <ion-item v-if="isPredefined">
+
+        <ion-item>
           <ion-label position="stacked">Chain ID</ion-label>
           <ion-input
-              v-model.number="tempOverrides.chainId"
+              v-model.number="workingCopy.chainId"
               type="number"
-              :placeholder="defaultNetwork.chainId.toString()"
+              :placeholder="base.chainId.toString()"
           />
         </ion-item>
-        <ion-item v-if="isPredefined">
-          <ion-label position="stacked"> Native Symbol</ion-label>
+
+        <ion-item>
+          <ion-label position="stacked">Native Symbol</ion-label>
           <ion-input
-              v-model.trim="tempOverrides.nativeSymbol"
-              :placeholder="defaultNetwork.nativeSymbol"
+              v-model.trim="workingCopy.nativeSymbol"
+              :placeholder="base.nativeSymbol"
           />
         </ion-item>
-        <ion-item v-if="isPredefined">
+
+        <ion-item>
           <ion-label position="stacked">RPC URL</ion-label>
           <ion-input
-              v-model.trim="tempRpcUrl"
-              :placeholder="defaultNetwork.rpcUrl"
+              v-model.trim="workingCopy.rpcUrl"
               type="url"
+              :placeholder="base.rpcUrl"
           />
-          <ion-note v-if="rpcError" color="danger" class="ion-padding-start">
-            {{ rpcError }}
+          <ion-note
+              v-if="urlError"
+              color="danger"
+              class="ion-padding-start"
+          >
+            {{ urlError }}
           </ion-note>
         </ion-item>
-        <ion-item v-if="isPredefined">
+
+        <ion-item>
           <ion-label position="stacked">Block Explorer URL</ion-label>
           <ion-input
-              v-model.trim="tempOverrides.blockExplorer"
-              :placeholder="defaultNetwork.blockExplorer"
+              v-model.trim="workingCopy.blockExplorer"
+              :placeholder="base.blockExplorer"
           />
         </ion-item>
 
-        <!-- Custom Network Editing -->
-        <template v-if="isCustom && tempCustomNetwork">
-          <ion-item>
-            <ion-label position="stacked">Label</ion-label>
-            <ion-input v-model.trim="tempCustomNetwork.label"/>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Chain ID</ion-label>
-            <ion-input v-model.trim="tempCustomNetwork.chainId"/>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Native Symbol</ion-label>
-            <ion-input v-model.trim="tempCustomNetwork.nativeSymbol"/>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">RPC URL</ion-label>
-            <ion-input v-model.trim="tempCustomNetwork.rpcUrl" type="url"/>
-            <ion-note v-if="rpcError" color="danger" class="ion-padding-start">
-              {{ rpcError }}
-            </ion-note>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Block Explorer URL</ion-label>
-            <ion-input v-model="tempCustomNetwork.blockExplorer"/>
-          </ion-item>
-        </template>
-
         <!-- Save and Delete Buttons -->
-        <ion-item>
-          <div>
-            <ion-button
-                v-if="isCustom && tempCustomNetwork"
-                color="danger"
-                @click="removeCustomNetwork"
-            >
-              Delete Network
-            </ion-button>
-            <ion-button
-                @click="saveChanges"
-                :disabled="!hasChanges"
-            >
-              Save
-            </ion-button>
-          </div>
+        <ion-item lines="none">
+          <ion-button
+              v-if="isCustom"
+              color="danger"
+              @click="removeCustomNetwork"
+          >
+            Delete Network
+          </ion-button>
+
+          <ion-button
+              class="ion-margin-start"
+              :disabled="!hasChanges"
+              @click="saveChanges"
+          >
+            Save
+          </ion-button>
         </ion-item>
       </ion-list>
     </ion-content>
   </BaseLayout>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import {
-  IonButton,
-  IonContent,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonSelect,
-  IonSelectOption,
-  modalController,
+  IonButton, IonContent, IonInput, IonItem, IonLabel, IonList,
+  IonSelect, IonSelectOption, IonNote, modalController, toastController,
 } from '@ionic/vue';
+import { computed, reactive, watch } from 'vue';
 import BaseLayout from '@/layouts/BaseLayout.vue';
-import { getAllNetworkList, getSelectedNetwork, setSelectedNetwork } from '@/utils/networkUtils';
-import { getCustomNetworkOverrides, setCustomNetworkOverride } from '@/utils/customNetworkOverride';
-import { addCustomNetwork, deleteCustomNetwork, getCustomNetworks, updateCustomNetwork } from '@/utils/customNetwork';
-import type { NetworkInfo, NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
-import { getNetworkInfo, NETWORK_LIST } from '../../../../packages/wallet-core/ethereum/network';
-import { computed, onMounted, reactive, ref, toRaw } from 'vue';
-import CreateCustomNetwork from "@/components/CreateCustomNetwork.vue";
+import { useNetworkStore } from '@/utils/network';
+import {
+  NETWORKS,
+  type NetworkInfo,
+  type NetworkKey,
+} from '../../../../packages/wallet-core/ethereum/network';
+import CreateCustomNetwork from '@/components/CreateCustomNetwork.vue';
 
-// Initialize reactive references for network data
-const selectedNetwork = ref<string>('syscoin');
-const allNetworks = ref<NetworkInfo[]>([]);
-const customOverrides = ref<Partial<Record<string, Partial<NetworkInfo>>>>({});
-const tempOverrides = ref<Partial<NetworkInfo>>({});
-const tempRpcUrl = ref<string>('');
-const rpcError = ref<string>('');
-const tempCustomNetwork = ref<NetworkInfo | null>(null);
-// Compute whether the selected network is predefined
-const isPredefined = computed(() => NETWORK_LIST.some(n => n.key === selectedNetwork.value));
-// Retrieve default network information
-const defaultNetwork = computed((): NetworkInfo => {
-  if (isPredefined.value) {
-    return getNetworkInfo(selectedNetwork.value as NetworkKey);
-  }
-  return {} as NetworkInfo;
+// Initialize network store
+const net = useNetworkStore();
+
+// Bind selected network key bidirectionally
+const selectedNetwork = computed<string>({
+  get: () => net.selected,
+  set: k => net.select(k),
 });
-// Compute whether the selected network is custom
+
+// Compute list of all networks
+const allNetworks = computed(() => net.allNetworks);
+
+// Determine if network is predefined
+const isPredefined = computed(() => selectedNetwork.value in NETWORKS);
+
+// Determine if network is custom
 const isCustom = computed(() => !isPredefined.value);
-// Compute the default RPC URL
-const defaultRpcUrl = computed(() => defaultNetwork.value.rpcUrl || '');
 
-// Determine if there are unsaved changes
-const hasChanges = computed(() => {
-  if (isPredefined.value) {
-    const current = customOverrides.value[selectedNetwork.value] || {};
-    const currentRpc = current.rpcUrl || '';
-    const tempRpc = tempRpcUrl.value.trim();
-    const rpcChanged = tempRpc !== currentRpc && tempRpc !== defaultRpcUrl.value;
-    const otherChanged = Object.keys(tempOverrides.value)
-        .filter((k) => k !== 'rpcUrl')
-        .some((key) => tempOverrides.value[key as keyof NetworkInfo] !== current[key as keyof NetworkInfo]);
-    return (rpcChanged || otherChanged) && !rpcError.value;
-  } else if (isCustom.value && tempCustomNetwork.value) {
-    const original = allNetworks.value.find((n) => n.key === selectedNetwork.value);
-    return JSON.stringify(tempCustomNetwork.value) !== JSON.stringify(original);
-  }
-  return false;
+// Derive base network info
+const base = computed<NetworkInfo>(() =>
+    isPredefined.value
+        ? NETWORKS[selectedNetwork.value as NetworkKey]
+        : net.selectedInfo,
+);
+
+// Create editable copy of selected network info
+const workingCopy = reactive<NetworkInfo>({ ...net.selectedInfo });
+
+// Reset workingCopy on network change
+watch(selectedNetwork, () => {
+  Object.assign(workingCopy, net.selectedInfo);
 });
 
-// Validate URL format
-function isValidUrl(url: string): boolean {
+// RPC URL validation message
+const urlError = computed(() =>
+    isValidUrl(workingCopy.rpcUrl) ? '' : 'Invalid URL'
+);
+
+/**
+ * Check whether a string is a valid URL
+ * @param u  The URL string to validate
+ * @returns  True if empty or valid URL; false otherwise
+ */
+function isValidUrl(u?: string): boolean {
+  if (!u) return true;
   try {
-    new URL(url);
+    new URL(u);
     return true;
   } catch {
     return false;
   }
 }
 
-// Load initial data on component mount
-onMounted(async() => {
-  // Load the saved network selection
-  selectedNetwork.value = await getSelectedNetwork();
-  // Load any network overrides
-  customOverrides.value = await getCustomNetworkOverrides();
-  // Load the list of all networks
-  allNetworks.value = await getAllNetworkList();
-  // Update temporary fields
-  await updateTempFields();
-});
-
-// Handle network selection change
-async function onNetworkChange() {
-  // Persist the new network selection
-  await setSelectedNetwork(selectedNetwork.value as NetworkKey);
-  // Update temporary fields
-  await updateTempFields();
+/**
+ * Compute differences between two NetworkInfo objects
+ * @param a  Original info
+ * @param b  Modified info
+ * @returns  Object containing only changed keys and values
+ */
+function diff(a: NetworkInfo, b: NetworkInfo): Partial<NetworkInfo> {
+  return Object.fromEntries(
+      (Object.keys(a) as (keyof NetworkInfo)[])
+          .filter(k => a[k] !== b[k])
+          .map(k => [k, b[k]])
+  ) as Partial<NetworkInfo>;
 }
 
-// Update temporary fields based on network type
-async function updateTempFields() {
-  if (isPredefined.value) {
-    const overrides = customOverrides.value[selectedNetwork.value] ?? {};
-    tempOverrides.value = reactive({ ...defaultNetwork.value, ...overrides, });
-    tempRpcUrl.value = overrides.rpcUrl ?? defaultNetwork.value.rpcUrl;
-    tempCustomNetwork.value = null;
-  } else {
-    // Load custom network data
-    const customNetworks = await getCustomNetworks();
-    const custom = customNetworks.find((n) => n.key === selectedNetwork.value);
-    tempCustomNetwork.value = custom ? reactive({ ...custom }) : null;
-    tempRpcUrl.value = '';
-  }
-}
+// Flag presence of unsaved changes
+const hasChanges = computed(
+    () => JSON.stringify(net.selectedInfo) !== JSON.stringify(workingCopy)
+);
 
-// Save network changes
+/**
+ * Persist edits to the selected network
+ * - If URL invalid: show error toast
+ * - For predefined: apply override patch
+ * - For custom: update stored entry
+ */
 async function saveChanges() {
+  if (!hasChanges.value) return;
+  if (urlError.value) return toast(urlError.value, 'danger');
+
   if (isPredefined.value) {
-    // Prepare cleaned overrides for predefined networks
-    const cleaned: Partial<NetworkInfo> = {
-      ...tempOverrides.value,
-      rpcUrl: tempRpcUrl.value.trim() || undefined,
-    };
-    // Validate RPC URL
-    if (cleaned.rpcUrl && !isValidUrl(cleaned.rpcUrl)) {
-      rpcError.value = 'Invalid URL format';
-      return;
-    }
-    // Remove default RPC URL if unchanged
-    if (cleaned.rpcUrl === defaultRpcUrl.value) {
-      delete cleaned.rpcUrl;
-    }
-    // Save overrides
-    await setCustomNetworkOverride(selectedNetwork.value as NetworkKey, cleaned);
-  } else if (isCustom.value && tempCustomNetwork.value) {
-    // Validate custom network RPC URL
-    if (!isValidUrl(tempCustomNetwork.value.rpcUrl)) {
-      rpcError.value = 'Invalid URL format';
-      return;
-    }
-    // Update custom network
-    await updateCustomNetwork(selectedNetwork.value, toRaw(tempCustomNetwork.value!));
+    const patch = diff(
+        NETWORKS[selectedNetwork.value as NetworkKey],
+        workingCopy
+    );
+    net.setOverride(selectedNetwork.value as NetworkKey, patch);
+  } else {
+    net.updateCustom(selectedNetwork.value, { ...workingCopy });
   }
-  // Refresh overrides and network list
-  customOverrides.value = await getCustomNetworkOverrides();
-  allNetworks.value = await getAllNetworkList();
-  // Update temporary fields
-  await updateTempFields();
-  // Clear RPC error
-  rpcError.value = '';
 }
 
-// Open modal to add a new custom network
+// Remove selected custom network
+function removeCustomNetwork() {
+  if (isCustom.value) {
+    net.removeCustom(selectedNetwork.value);
+  }
+}
+
+/**
+ * Open "Add Custom Network" modal
+ * When dismissed with data, add new network
+ */
 async function openAddNetworkModal() {
-  // Create and presents the modal
   const modal = await modalController.create({
-    component: CreateCustomNetwork,
+    component: CreateCustomNetwork
   });
-  // Handle modal dismissal
-  modal.onDidDismiss().then(async(result) => {
-    if (result.data?.network) {
-      // Add the new network
-      await addNewNetwork(result.data.network);
+  modal.onDidDismiss().then(({ data }) => {
+    if (data?.network) {
+      net.addCustom(data.network);
     }
   });
   await modal.present();
 }
 
-// Add a new custom network
-async function addNewNetwork(network: NetworkInfo) {
-  try {
-    // Save the new custom network
-    await addCustomNetwork(network);
-    // Refresh the network list
-    allNetworks.value = await getAllNetworkList();
-    // Select the new network
-    selectedNetwork.value = network.key;
-    // Persist the selection
-    await setSelectedNetwork(network.key);
-    // Update temporary fields
-    await updateTempFields();
-  } catch (error: any) {
-    // Display error message
-    alert(error.message);
-  }
-}
-
-// Remove a custom network
-async function removeCustomNetwork() {
-  if (isCustom.value) {
-    // Delete the custom network
-    await deleteCustomNetwork(selectedNetwork.value);
-    // Refresh the network list
-    allNetworks.value = await getAllNetworkList();
-    // Default to syscoin network
-    selectedNetwork.value = 'syscoin';
-    // Persist the selection
-    await setSelectedNetwork('syscoin');
-    // Update temporary fields
-    await updateTempFields();
-  }
+/**
+ * Show a brief toast notification
+ * @param msg    Message text
+ * @param color  Toast color theme
+ */
+async function toast(msg: string, color: string = 'primary') {
+  const t = await toastController.create({
+    message: msg,
+    duration: 2000,
+    color
+  });
+  await t.present();
 }
 </script>

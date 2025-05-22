@@ -74,8 +74,8 @@ export function getRpcUrl(key: NetworkKey, customRpcUrl?: string): string {
 }
 
 /**
- * Build a JsonRpcProvider for the given network, optionally use a custom RPC URL.
+ * Build a JsonRpcProvider just by an RPC url passed by param.
  */
-export function getProviderForNetwork(key: NetworkKey, customRpcUrl?: string): ethers.JsonRpcProvider {
-	return new ethers.JsonRpcProvider(getRpcUrl(key, customRpcUrl));
+export function buildProvider(rpcUrl: string) {
+  return new ethers.JsonRpcProvider(rpcUrl);
 }

@@ -5,7 +5,7 @@ import { getSelectedNetwork } from './network';
 /**
  * A token imported by the user.
  */
-interface ImportedToken {
+export interface ImportedToken {
   /** Contract address of the token */
   address: string;
   /** Token ticker symbol, e.g. “USDC” */

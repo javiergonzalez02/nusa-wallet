@@ -1,7 +1,7 @@
 import { ref, watch } from 'vue';
 import { Storage } from '@ionic/storage';
 import type { NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
-import { getSelectedNetwork } from "@/utils/networkUtils";
+import { getSelectedNetwork, useNetworkStore } from "@/utils/network";
 
 // Possible states a tracked transaction can have
 export type TxStatus = 'pending' | 'confirmed' | 'failed';
@@ -38,7 +38,7 @@ async function ready() {
  */
 async function persist(): Promise<void> {
 	await ready();                                   // make sure storage exists
-	const net = await getSelectedNetwork();          // current network
+	const net = getSelectedNetwork();          // current network
 	// Load the saved network‑to‑txlist map (or use an empty object if nothing’s stored),
 	// and tell TypeScript it’s (possibly partial) Record<EvmNetwork, TxRecord[]>.
 	const all = (await storage.get(KEY)) as Partial<Record<NetworkKey, TxRecord[]>> ?? {};
@@ -48,8 +48,6 @@ async function persist(): Promise<void> {
 
 // Active history list – auto-updates UI when modified
 const list = ref<TxRecord[]>([]);
-// Current active network (used to separate TXs by network)
-let network: NetworkKey;
 
 /**
  * Initializes the history system:
@@ -59,7 +57,7 @@ let network: NetworkKey;
  */
 export async function initTxHistory() {
 	await ready();
-	network = await getSelectedNetwork();
+	const network = getSelectedNetwork();
 	list.value = await storage.get(KEY).then((all) =>
 			(all as Record<NetworkKey, TxRecord[]> ?? {})[network] ?? []
 	);
@@ -71,6 +69,7 @@ export async function initTxHistory() {
  */
 watch(list, async(newVal) => {
 	await ready();
+	const network = getSelectedNetwork();
 	const all = (await storage.get(KEY)) as Record<NetworkKey, TxRecord[]> ?? {};
 	all[network] = newVal;
 	await storage.set(KEY, all);
@@ -117,4 +116,31 @@ export async function clearTxHistory() {
   await ready();
   await storage.remove(KEY);
 	list.value = [];
+}
+
+// Flag to ensure the watcher is only registered once
+let watcherRegistered = false;
+
+/**
+ * Register a watcher on the selected network in the network store.
+ * When the user switches networks, this will re-initialize the tx history
+ * for the newly selected network.
+ */
+export function registerTxHistoryWatcher() {
+  // If the watcher is already set up, do nothing
+  if (watcherRegistered) return;
+
+  // Mark that the watcher is now registered
+  watcherRegistered = true;
+
+  // Grab the store that keeps track of the current network
+  const net = useNetworkStore();
+
+  // Watch for changes to the `selected` network property
+  watch(
+    // getter: returns the currently selected network key
+    () => net.selected,
+    // callback: when the network changes, re-load the tx history
+    () => initTxHistory(),
+  );
 }

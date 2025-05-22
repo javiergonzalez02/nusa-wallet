@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
 import { fetchTokenBalance, getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import {
@@ -106,128 +106,153 @@ import {
   modalController,
   toastController
 } from '@ionic/vue';
-import { getProvider, getSelectedNetworkInfo } from '@/utils/networkUtils';
+import { useNetworkStore } from '@/utils/network';
 import AddToken from '@/components/AddToken.vue';
 import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";
 import { add, copyOutline } from "ionicons/icons";
-import { initTxHistory, useTxHistory } from "@/utils/txHistory";
+import { initTxHistory, registerTxHistoryWatcher, useTxHistory } from "@/utils/txHistory";
 import { resumeTxWatchers } from '@/utils/watchTx';
 import { watchBalance } from '@/utils/watchBalance';
 import { formatEther } from "ethers";
-import { NetworkInfo } from "../../../../packages/wallet-core/ethereum/network";
 import { useAccountStore } from "@/stores/accountStore";
+import { useOnNetworkChange } from '@/composables/useOnNetworkChange';
 
+// Track imported tokens
 const tokens = ref<Array<{ address: string; symbol: string; name: string; decimals: number; balance: string }>>([]);
-
 // Use a ref to track the active segment; defaulting to 'activity'
 const segment = ref('activity');
 
 // Refs to store account details and balance
 const accountAddress = ref('Loading...');
-const accountPrivateKey = ref('Loading...');
 const accountBalance = ref('Loading...');
-const nativeSymbol = ref(''); // Reactive variable for the native currency symbol
+// Reactive transaction history
 const transactions = useTxHistory();
-const blockExplorerBase = ref();
-// Holds the disposer function for the active balance watcher, or undefined if no watcher is running
+const net = useNetworkStore();
+// Compute provider from network
+let provider = computed(() => net.provider);
+// Compute block explorer base URL
+const blockExplorerBase = computed(() => net.selectedInfo.blockExplorer);
+// Compute native symbol from network
+const nativeSymbol = computed(() => net.selectedInfo.nativeSymbol);
+// Store loaded mnemonic and balance watcher stopper
+let mnemonic = '';
 let stopBalanceWatch: (() => void) | undefined;
 
-
+// Initialize component on mount
 onMounted(async() => {
-  try {
-    const mnemonic = await getSeedPhrase();
-    if (mnemonic) {
-      // Fetch network information to get the native symbol
-      const networkInfo: NetworkInfo = await getSelectedNetworkInfo();
-      nativeSymbol.value = networkInfo.nativeSymbol;
-      blockExplorerBase.value = networkInfo.blockExplorer;
-      // Provider for the selected network
-      const provider = await getProvider();
-      const { address, privateKey, balance } = await getAccountDetails(mnemonic, provider);
-      accountAddress.value = address;
-      accountPrivateKey.value = privateKey;
-      accountBalance.value = balance !== null ? balance : 'Error fetching balance';
-      useAccountStore().setAccount(address);
-      await loadTokens();
-      await initTxHistory();     // load + make reactive
-      await resumeTxWatchers();  // restart any pending watchers
-      // Start watching the on‑chain balance of the account
-      stopBalanceWatch = await watchBalance(
-          accountAddress.value,
-          (wei) => {
-            // Update the reactive balance when a new block arrives
-            accountBalance.value = formatEther(wei);
-          }
-      );
-    } else {
-      accountAddress.value = 'Mnemonic not found';
-      accountPrivateKey.value = 'Mnemonic not found';
-      accountBalance.value = 'Mnemonic not found';
-    }
-  } catch (error) {
-    console.error('Error fetching seed phrase:', error);
-    accountAddress.value = 'Error fetching account';
-    accountPrivateKey.value = 'Error fetching private key';
-    accountBalance.value = 'Error fetching balance';
-  }
+  // Load seed phrase
+  mnemonic = (await getSeedPhrase()) ?? '';
+  // Load persisted tx history
+  await initTxHistory();
+  // Watch for network changes in tx history
+  registerTxHistoryWatcher();
 });
 
+// Refresh UI on network change
+useOnNetworkChange(refreshForNetwork);
+
+// Cleanup on unmount
 onUnmounted(() => {
-  // Stop watching balance when the component is destroyed
-  if (stopBalanceWatch) stopBalanceWatch();
+  // Stop balance watcher
+  stopBalanceWatch?.();
 });
 
-const copyAddress = async() => {
+/**
+ * Refresh account data when network changes
+ */
+async function refreshForNetwork() {
+  try {
+    // Ensure mnemonic is available
+    if (!mnemonic) throw new Error('Seed phrase missing');
+    // Fetch account address and balance
+    const { address, balance } = await getAccountDetails(mnemonic, provider.value);
+    accountAddress.value = address;
+    accountBalance.value = balance ?? '0';
+    // Update global account store
+    useAccountStore().setAccount(address);
+    // Reload token balances
+    await loadTokens();
+    // Restart balance watcher
+    stopBalanceWatch?.();
+    stopBalanceWatch = await watchBalance(
+        address,
+        (wei) => {
+          accountBalance.value = formatEther(wei);
+        }
+    );
+    // Resume pending tx watchers
+    await resumeTxWatchers();
+  } catch (err) {
+    console.error(err);
+    // Display error state
+    accountAddress.value = 'Error';
+    accountBalance.value = 'Error';
+  }
+}
+
+/**
+ * Copy account address to clipboard
+ */
+async function copyAddress() {
   try {
     await navigator.clipboard.writeText(accountAddress.value);
-    const toast = await toastController.create({
-      message: 'Address copied to clipboard',
-      duration: 2000,
-      position: 'bottom',
-    });
-    await toast.present();
-  } catch (err) {
-    console.error('Copy failed', err);
-    const toast = await toastController.create({
-      message: 'Failed to copy address',
-      duration: 2000,
-      position: 'bottom',
-    });
-    await toast.present();
+    await toast('Address copied to clipboard');
+  } catch {
+    await toast('Copy failed', 'danger');
   }
-};
+}
 
+/**
+ * Load ERC-20 token balances for the current account
+ */
 async function loadTokens() {
   tokens.value = [];
-  const provider = await getProvider();
   const account = accountAddress.value;
+  // Get user-imported tokens
   const imported = await getImportedTokens();
   for (const t of imported) {
-    const balance = await fetchTokenBalance(t.address, account, provider, t.decimals);
+    // Fetch and store each token's balance
+    const balance = await fetchTokenBalance(t.address, account, provider.value, t.decimals);
     tokens.value.push({ ...t, balance });
   }
 }
 
+/**
+ * Open modal to add a new token
+ */
 const openAddTokenModal = async() => {
-  const modal = await modalController.create({
-    component: AddToken
-  });
+  const modal = await modalController.create({ component: AddToken });
+  // Reload tokens after modal closes
   modal.onDidDismiss().then(() => loadTokens());
   await modal.present();
 };
 
+/**
+ * Remove a token and reload list
+ */
 async function removeToken(addr: string) {
   await removeImportedToken(addr);
   await loadTokens();
 }
 
+/**
+ * Open transaction on block explorer
+ */
 function openExplorer(txHash: string) {
   if (!blockExplorerBase.value) {
     alert('Set a block explorer for this chain in order to view the tx.')
   }
   const url = `${blockExplorerBase.value}/tx/${txHash}`;
   window.open(url, '_blank', 'noopener');
+}
+
+/**
+ * Show a toast message
+ */
+async function toast(msg: string, color: string = 'primary') {
+  const t = await toastController.create({ message: msg, duration: 2000, color });
+  await t.present();
 }
 </script>
 

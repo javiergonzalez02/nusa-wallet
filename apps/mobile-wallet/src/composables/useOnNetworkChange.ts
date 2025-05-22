@@ -25,17 +25,13 @@ export function useOnNetworkChange(
 			() => net.ready,               // watch the "ready" flag
 			(isReady) => {
 				if (isReady) {
-					run();                     // run effect once store is ready
 					stopReady();               // then immediately stop this watcher
 				}
 			},
 			{ immediate: true },           // also invoke callback on registration
 	);
 
-	// 2) Ensure effect also runs once when the component is mounted
-	onMounted(run);
-
-	// 3) Main watcher: observe changes to the NetworkInfo object,
+	// 2) Main watcher: observe changes to the NetworkInfo object,
 	// and run effect each time the user switches networks or modifies any network details
 	return watch(
 			() => net.selectedInfo,     // watch the entire selectedInfo object

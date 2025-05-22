@@ -86,8 +86,14 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { getSeedPhrase } from '@/utils/secureStorage/seed';
-import { fetchTokenBalance, getAccountDetails } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import {
+  fetchTokenBalance,
+  getAddressFromMnemonic,
+  getBalanceForAddress
+} from '../../../../packages/wallet-core/ethereum/ethereumUtils';
+import {
+  IonBadge,
+  IonButton,
   IonCol,
   IonContent,
   IonFab,
@@ -98,11 +104,9 @@ import {
   IonLabel,
   IonList,
   IonRow,
-  IonBadge,
-  IonButton,
-  IonText,
   IonSegment,
   IonSegmentButton,
+  IonText,
   modalController,
   toastController
 } from '@ionic/vue';
@@ -143,6 +147,8 @@ let stopBalanceWatch: (() => void) | undefined;
 onMounted(async() => {
   // Load seed phrase
   mnemonic = (await getSeedPhrase()) ?? '';
+  // Fetch account address
+  accountAddress.value = getAddressFromMnemonic(mnemonic);
   // Load persisted tx history
   await initTxHistory();
   // Watch for network changes in tx history
@@ -165,18 +171,17 @@ async function refreshForNetwork() {
   try {
     // Ensure mnemonic is available
     if (!mnemonic) throw new Error('Seed phrase missing');
-    // Fetch account address and balance
-    const { address, balance } = await getAccountDetails(mnemonic, provider.value);
-    accountAddress.value = address;
+    // Fetch account balance
+    const balance = await getBalanceForAddress(mnemonic, provider.value);
     accountBalance.value = balance ?? '0';
     // Update global account store
-    useAccountStore().setAccount(address);
+    useAccountStore().setAccount(accountAddress.value);
     // Reload token balances
     await loadTokens();
     // Restart balance watcher
     stopBalanceWatch?.();
     stopBalanceWatch = await watchBalance(
-        address,
+        accountAddress.value,
         (wei) => {
           accountBalance.value = formatEther(wei);
         }

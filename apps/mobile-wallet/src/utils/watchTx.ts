@@ -1,15 +1,12 @@
 import { ethers } from 'ethers';
 import { updateStatus, useTxHistory } from './txHistory';
-import { getProvider } from '../stores/network';
+import { getProvider } from '@/stores/network';
 
 // Ensure there is a provider bound to the current network
 let provider: ethers.JsonRpcProvider;
 
 /**
  * Re‑create watchers for all transactions that are still “pending”.
- * TODO Should be called on:
- *   • App launch / reload
- *   • Network change
  */
 export async function resumeTxWatchers() {
 	provider = getProvider();

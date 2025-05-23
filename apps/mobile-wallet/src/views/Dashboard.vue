@@ -273,7 +273,8 @@ async function removeToken(addr: string) {
  */
 function openExplorer(txHash: string) {
   if (!blockExplorerBase.value) {
-    alert('Set a block explorer for this chain in order to view the tx.')
+    alert('Set a block explorer for this chain in order to view the tx.');
+    return;
   }
   const url = `${blockExplorerBase.value}/tx/${txHash}`;
   window.open(url, '_blank', 'noopener');

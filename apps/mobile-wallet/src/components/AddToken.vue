@@ -14,10 +14,11 @@
     <!-- Input field for the token contract address -->
     <ion-item>
       <ion-label position="stacked">Token Contract Address</ion-label>
-      <ion-input
-          v-model="tokenAddress"
-          placeholder="0x..."
-      />
+      <ion-input v-model="tokenAddress" placeholder="0x...">
+        <qrScanner
+            slot="end"
+            @scanned="onScanned"/>
+      </ion-input>
     </ion-item>
 
     <!-- Import button, disabled until the address is valid -->
@@ -48,6 +49,7 @@ import { getProvider } from '@/stores/network';
 import { fetchTokenMetadata } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import { addImportedToken } from '@/utils/tokenUtils';
 import { isAddress } from 'ethers';
+import QrScanner from "@/components/qrScanner.vue";
 
 const tokenAddress = ref('');
 
@@ -61,7 +63,7 @@ function dismiss() {
 }
 
 const importToken = async() => {
-  const provider = await getProvider();
+  const provider = getProvider();
   try {
     // Retrieve name, symbol, decimals from the ERC-20 contract
     const meta = await fetchTokenMetadata(tokenAddress.value, provider);
@@ -79,5 +81,15 @@ const importToken = async() => {
     alert('Failed to import token');
   }
 };
+
+/**
+ * Handle QR code scan result
+ * When 'scanned' event is emitted by the scanner, assign the value to the tokenAddress
+ */
+function onScanned(value: string | undefined) {
+  if (value) {
+    tokenAddress.value = value
+  }
+}
 </script>
 

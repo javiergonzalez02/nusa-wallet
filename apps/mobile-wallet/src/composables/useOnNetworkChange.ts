@@ -20,15 +20,16 @@ export function useOnNetworkChange(
 	// Create a helper that always invokes the callback with the store’s current provider and network info
 	const run = () => effect(net.provider, net.selectedInfo);
 
-	// 1) One-time watcher: wait until the store finishes initializing...
+	// 1) One-time watcher: immediately call the callback with the current `net.ready` value (to catch an already-ready store),
+  //    then automatically unsubscribe as soon as `net.ready` becomes true
 	const stopReady = watch(
-			() => net.ready,               // watch the "ready" flag
-			(isReady) => {
+			() => net.ready,            // watch the store’s `ready` boolean
+			(isReady) => {  // isReady: the current value of `net.ready`
 				if (isReady) {
-					stopReady();               // then immediately stop this watcher
+					stopReady();                   // cleanup this watcher once the store is ready
 				}
 			},
-			{ immediate: true },           // also invoke callback on registration
+			{ immediate: true },       // trigger callback right away to handle an already-ready state
 	);
 
 	// 2) Main watcher: observe changes to the NetworkInfo object,

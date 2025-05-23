@@ -11,14 +11,6 @@ export const useSeedStore = defineStore('seedStore', {
      */
     generateMnemonic() {
       this.mnemonic = createWalletMnemonic();
-    },
-    /**
-     * Sets the mnemonic to a provided value.
-     *
-     * @param newMnemonic The new mnemonic to store.
-     */
-    setMnemonic(newMnemonic: string) {
-      this.mnemonic = newMnemonic;
     }
   }
 });

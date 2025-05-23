@@ -1,4 +1,4 @@
-import { getProvider } from '@/utils/network';
+import { getProvider } from '@/stores/network';
 import { fetchTokenBalance } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import type { ImportedToken } from '@/utils/tokenUtils';
 

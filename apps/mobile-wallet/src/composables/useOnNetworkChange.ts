@@ -1,5 +1,5 @@
 import { watch, onMounted, type WatchStopHandle } from 'vue';
-import { useNetworkStore } from '@/utils/network';
+import { useNetworkStore } from '@/stores/network';
 import type { NetworkInfo } from '../../../../packages/wallet-core/ethereum/network';
 import type { ethers } from 'ethers';
 

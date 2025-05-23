@@ -1,7 +1,7 @@
 import { ref, watch } from 'vue';
 import { Storage } from '@ionic/storage';
 import type { NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
-import { getSelectedNetwork, useNetworkStore } from "@/utils/network";
+import { getSelectedNetwork, useNetworkStore } from "@/stores/network";
 
 // Possible states a tracked transaction can have
 export type TxStatus = 'pending' | 'confirmed' | 'failed';

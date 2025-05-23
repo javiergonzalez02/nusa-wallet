@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { getAccountDetails, sendERC20, sendTransaction } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
-import { useNetworkStore } from '@/utils/network';
+import { useNetworkStore } from '@/stores/network';
 import {
   IonButton,
   IonContent,

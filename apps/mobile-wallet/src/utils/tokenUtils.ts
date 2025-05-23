@@ -1,6 +1,6 @@
 import { Storage } from '@ionic/storage';
 import type { NetworkKey } from '../../../../packages/wallet-core/ethereum/network';
-import { getSelectedNetwork } from './network';
+import { getSelectedNetwork } from '../stores/network';
 
 /**
  * A token imported by the user.

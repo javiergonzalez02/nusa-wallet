@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { updateStatus, useTxHistory } from './txHistory';
-import { getProvider } from './network';
+import { getProvider } from '../stores/network';
 
 // Ensure there is a provider bound to the current network
 let provider: ethers.JsonRpcProvider;

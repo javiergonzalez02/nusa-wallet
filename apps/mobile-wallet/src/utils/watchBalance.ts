@@ -1,4 +1,4 @@
-import { getProvider } from '@/utils/network';
+import { getProvider } from '@/stores/network';
 
 export type BalanceCallback = (wei: bigint) => void;
 

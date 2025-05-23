@@ -110,7 +110,7 @@ import {
   modalController,
   toastController
 } from '@ionic/vue';
-import { useNetworkStore } from '@/utils/network';
+import { useNetworkStore } from '@/stores/network';
 import AddToken from '@/components/AddToken.vue';
 import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";

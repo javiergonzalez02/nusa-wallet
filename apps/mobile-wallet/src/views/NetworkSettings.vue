@@ -104,7 +104,7 @@ import {
 } from '@ionic/vue';
 import { computed, reactive, watch } from 'vue';
 import BaseLayout from '@/layouts/BaseLayout.vue';
-import { useNetworkStore } from '@/utils/network';
+import { useNetworkStore } from '@/stores/network';
 import {
   NETWORKS,
   type NetworkInfo,

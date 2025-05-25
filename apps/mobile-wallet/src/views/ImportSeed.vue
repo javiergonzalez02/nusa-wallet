@@ -63,6 +63,7 @@ const importSeed = async() => {
   try {
     // Saves phrase securely, then redirects to dashboard
     await setSeedPhrase(seed);
+    alert('Seed phrase saved successfully!');
     await router.push({ name: 'dashboard' });
   } catch (error) {
     console.error('Error:', error);

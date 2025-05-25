@@ -1,10 +1,10 @@
 <template>
   <BaseLayout>
-    <h1>Welcome!</h1>
     <!-- Seed Phrase Card-->
-    <ion-card>
+    <ion-card color="primary">
       <ion-card-header>
         <ion-card-title>Seed Phrase</ion-card-title>
+        <ion-card-subtitle>Write down your recovery phrase and store it in a secure location</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         {{ mnemonic }}
@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import { IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/vue';
+import { IonButton, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import BaseLayout from '../layouts/BaseLayout.vue';
 import { useSeedStore } from '@/stores/seedStore';

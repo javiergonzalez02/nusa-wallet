@@ -3,7 +3,19 @@
     <ion-content :fullscreen="true">
       <ion-card>
         <ion-card-header>
-          <ion-card-title>Account Info</ion-card-title>
+          <ion-item lines="none" fill="clear">
+            <ion-card-title>
+              Account Info
+            </ion-card-title>
+            <ion-button
+                slot="end"
+                fill="clear"
+                size="small"
+                @click="presentAccountCardOptions"
+            >
+              <ion-icon :icon="ellipsisVerticalOutline"/>
+            </ion-button>
+          </ion-item>
         </ion-card-header>
         <ion-card-content>
           <ion-grid class="ion-no-padding">
@@ -39,7 +51,7 @@
                 <p>{{ new Date(tx.timestamp).toLocaleString() }}</p>
                 <ion-button
                     fill="clear"
-                    @click="openExplorer(tx.hash)"
+                    @click="openTxInExplorer(tx.hash)"
                     size="small"
                 >
                   View on Explorer
@@ -108,13 +120,14 @@ import {
   IonSegmentButton,
   IonText,
   modalController,
-  toastController
+  toastController,
+  actionSheetController
 } from '@ionic/vue';
 import { useNetworkStore } from '@/stores/network';
 import AddToken from '@/components/AddToken.vue';
 import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";
-import { add, copyOutline } from "ionicons/icons";
+import { add, closeOutline, copyOutline, ellipsisVerticalOutline, eyeOutline } from "ionicons/icons";
 import { initTxHistory, registerTxHistoryWatcher, useTxHistory } from "@/utils/txHistory";
 import { resumeTxWatchers } from '@/utils/watchTx';
 import { watchBalance } from '@/utils/watchBalance';
@@ -271,13 +284,49 @@ async function removeToken(addr: string) {
 /**
  * Open transaction on block explorer
  */
-function openExplorer(txHash: string) {
+function openTxInExplorer(txHash: string) {
   if (!blockExplorerBase.value) {
     alert('Set a block explorer for this chain in order to view the tx.');
     return;
   }
   const url = `${blockExplorerBase.value}/tx/${txHash}`;
   window.open(url, '_blank', 'noopener');
+}
+
+/**
+ * Open transaction on block explorer
+ */
+function openAccountInExplorer(address: string) {
+  if (!accountAddress.value) {
+    alert('An account address is needed');
+    return;
+  }
+  const url = `${blockExplorerBase.value}/address/${address}`;
+  window.open(url, '_blank', 'noopener');
+}
+
+/**
+ * Show a three-dot menu with account related options
+ */
+async function presentAccountCardOptions() {
+  const actionSheet = await actionSheetController.create({
+    header: 'Account options',
+    buttons: [
+      {
+        text: 'View address on explorer',
+        icon: eyeOutline,
+        handler: () => {
+          openAccountInExplorer(accountAddress.value);
+        }
+      },
+      {
+        text: 'Cancel',
+        icon: closeOutline,
+        role: 'cancel'
+      }
+    ]
+  });
+  await actionSheet.present();
 }
 
 /**

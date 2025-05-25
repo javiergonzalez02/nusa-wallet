@@ -21,9 +21,9 @@
           placeholder="Repeat password"
       ></ion-input>
     </ion-item>
-    <!-- Enter Wallet Button -->
+    <!-- Continue Button -->
     <ion-button @click="enterWallet">
-      Enter Wallet
+      Continue
     </ion-button>
     <!-- Error Message -->
     <p v-if="errorMessage" style="color: red">{{ errorMessage }}</p>

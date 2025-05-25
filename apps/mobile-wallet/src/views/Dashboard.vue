@@ -101,7 +101,7 @@ import { getSeedPhrase } from '@/utils/secureStorage/seed';
 import {
   fetchTokenBalance,
   getAddressFromMnemonic,
-  getBalanceForAddress
+  getBalanceForAddress, getPrivateKeyFromMnemonic
 } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import {
   IonBadge,
@@ -121,13 +121,13 @@ import {
   IonText,
   modalController,
   toastController,
-  actionSheetController
+  actionSheetController, alertController
 } from '@ionic/vue';
 import { useNetworkStore } from '@/stores/network';
 import AddToken from '@/components/AddToken.vue';
 import { getImportedTokens, removeImportedToken } from '@/utils/tokenUtils';
 import BaseLayout from "@/layouts/BaseLayout.vue";
-import { add, closeOutline, copyOutline, ellipsisVerticalOutline, eyeOutline } from "ionicons/icons";
+import { add, closeOutline, copyOutline, ellipsisVerticalOutline, eyeOutline, keyOutline } from "ionicons/icons";
 import { initTxHistory, registerTxHistoryWatcher, useTxHistory } from "@/utils/txHistory";
 import { resumeTxWatchers } from '@/utils/watchTx';
 import { watchBalance } from '@/utils/watchBalance';
@@ -135,6 +135,7 @@ import { formatEther } from "ethers";
 import { useAccountStore } from "@/stores/accountStore";
 import { useOnNetworkChange } from '@/composables/useOnNetworkChange';
 import { watchTokenBalances } from "@/utils/watchTokenBalance";
+import { getPassword } from "@/utils/secureStorage/password";
 
 // Track imported tokens
 const tokens = ref<Array<{ address: string; symbol: string; name: string; decimals: number; balance: string }>>([]);
@@ -320,6 +321,11 @@ async function presentAccountCardOptions() {
         }
       },
       {
+        text: 'Show Private Key',
+        icon: keyOutline,
+        handler: showPrivateKey
+      },
+      {
         text: 'Cancel',
         icon: closeOutline,
         role: 'cancel'
@@ -328,6 +334,56 @@ async function presentAccountCardOptions() {
   });
   await actionSheet.present();
 }
+
+/**
+ * Ask for the wallet password and show the account private key
+ */
+async function showPrivateKey() {
+  const alert = await alertController.create({
+    header: 'Enter Wallet Password',
+    inputs: [{
+      name: 'pw',
+      type: 'password',
+      placeholder: 'Password'
+    }],
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'OK',
+        handler: async(data) => {
+          try {
+            const stored = await getPassword();
+            if (data.pw !== stored) {
+              throw new Error('Incorrect password');
+            }
+            const mnemonic = (await getSeedPhrase())!;
+            const priv = getPrivateKeyFromMnemonic(mnemonic);
+            const show = await alertController.create({
+              header: 'Your Private Key',
+              message: priv,
+              buttons: [{
+                text: 'Copy',
+                handler: () => {
+                  navigator.clipboard.writeText(priv);
+                }
+              }, 'Close']
+            });
+            await show.present();
+          } catch {
+            const err = await alertController.create({
+              header: 'Error',
+              message: 'Incorrect password',
+              buttons: ['OK']
+            });
+            await err.present();
+          }
+        }
+      }
+    ]
+  });
+  await alert.present();
+}
+
 
 /**
  * Show a toast message

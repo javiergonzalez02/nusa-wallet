@@ -25,6 +25,18 @@
             Delete
           </ion-button>
         </ion-item>
+
+        <ion-item>
+          <ion-label>
+            <h2>Change Password</h2>
+            <p class="ion-text-wrap ion-text-small">
+              Set a new password for your wallet.
+            </p>
+          </ion-label>
+          <ion-button slot="end" expand="block" fill="solid" @click="promptPassword('change')">
+            Change
+          </ion-button>
+        </ion-item>
       </ion-list>
     </ion-content>
   </BaseLayout>
@@ -42,7 +54,7 @@ import { getPassword } from "@/utils/secureStorage/password";
  * Prompt the user for their wallet password before performing
  * either the "reveal" or "delete" action.
  */
-async function promptPassword(action: 'reveal' | 'delete') {
+async function promptPassword(action: 'reveal' | 'delete' | 'change') {
   const pwAlert = await alertController.create({
     header: 'Enter Wallet Password',
     inputs: [{
@@ -70,9 +82,11 @@ async function promptPassword(action: 'reveal' | 'delete') {
           }
           // Password is correct: decide which action to run
           if (action === 'reveal') {
-            return showSeed();
-          } else {
-            return confirmDelete();
+            await showSeed();
+          } else if (action === 'delete') {
+            await confirmDelete();
+          } else if (action === 'change') {
+            await router.push({ name: 'createpass', query: { next: 'SecuritySettings' } });
           }
         }
       }

@@ -255,15 +255,21 @@ async function copyAddress() {
  * Load ERC-20 token balances for the current account
  */
 async function loadTokens() {
-  tokens.value = [];
-  const account = accountAddress.value;
-  // Get user-imported tokens
-  const imported = await getImportedTokens();
-  for (const t of imported) {
-    // Fetch and store each token's balance
-    const balance = await fetchTokenBalance(t.address, account, provider.value, t.decimals);
-    tokens.value.push({ ...t, balance });
-  }
+  // 1. Get user-imported tokens
+  const imported = await getImportedTokens()
+
+  // 2. Fetch balances in parallel
+  const balances = await Promise.all(
+    imported.map(t =>
+      fetchTokenBalance(t.address, accountAddress.value, provider.value, t.decimals)
+    )
+  )
+
+  // 3. Build & assign a fresh array of { address, symbol, name, decimals, balance }
+  tokens.value = imported.map((t, i) => ({
+    ...t,
+    balance: balances[i]
+  }))
 }
 
 /**

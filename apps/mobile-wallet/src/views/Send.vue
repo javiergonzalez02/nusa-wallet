@@ -47,10 +47,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { getAccountDetails, sendERC20, sendTransaction } from '../../../../packages/wallet-core/ethereum/ethereumUtils';
 import { useNetworkStore } from '@/stores/network';
 import {
+  alertController,
   IonButton,
   IonContent,
   IonInput,
@@ -59,7 +60,7 @@ import {
   IonList,
   IonSelect,
   IonSelectOption,
-  alertController,
+  onIonViewWillEnter,
   toastController
 } from '@ionic/vue';
 import BaseLayout from "@/layouts/BaseLayout.vue";
@@ -83,10 +84,8 @@ const privateKey = ref();                 // Private key of the account
 const tokens = ref<Array<{ address: string; symbol: string; decimals: number }>>([]); // Imported tokens
 const selectedAsset = ref<string>('');    // Native coin or selected token
 
-// Load initial data on component mount
-onMounted(async() => {
-  await prepareForNetwork();
-});
+// Refresh data on view enter
+onIonViewWillEnter(prepareForNetwork);
 
 // Refresh data when network changes
 useOnNetworkChange(prepareForNetwork);

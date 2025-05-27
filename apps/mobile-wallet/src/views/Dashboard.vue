@@ -165,6 +165,8 @@ onMounted(async() => {
   mnemonic = (await getSeedPhrase()) ?? '';
   // Fetch account address
   accountAddress.value = getAddressFromMnemonic(mnemonic);
+  // Update global account store
+  useAccountStore().setAccount(accountAddress.value);
   // Wait for network store to be ready before loading data
   await waitForNetworkReady();
   // Load info related to network
@@ -195,8 +197,6 @@ async function refreshForNetwork() {
     // Fetch account balance
     const balance = await getBalanceForAddress(accountAddress.value, provider.value);
     accountBalance.value = balance ?? '0';
-    // Update global account store
-    useAccountStore().setAccount(accountAddress.value);
     // Reload token balances
     await loadTokens();
     // Restart native balance watcher
@@ -214,7 +214,6 @@ async function refreshForNetwork() {
   } catch (err) {
     console.error(err);
     // Display error state
-    accountAddress.value = 'Error';
     accountBalance.value = 'Error';
   }
 }

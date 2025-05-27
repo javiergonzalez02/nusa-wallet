@@ -203,6 +203,9 @@ async function saveChanges() {
   } else {
     net.updateCustom(selectedNetwork.value, { ...workingCopy });
   }
+
+  // Refresh form with saved values
+  Object.assign(workingCopy, net.selectedInfo);
 }
 
 // Remove selected custom network

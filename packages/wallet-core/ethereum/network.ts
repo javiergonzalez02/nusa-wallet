@@ -41,6 +41,14 @@ export const NETWORKS = {
     rpcUrl: 'https://polygon-rpc.com',
     blockExplorer: 'https://polygonscan.com',
   },
+  rollux: {
+    key: 'rollux',
+    label: 'Rollux',
+    chainId: 570,
+    nativeSymbol: 'SYS',
+    rpcUrl: 'https://rpc.rollux.com',
+    blockExplorer: 'https://explorer.rollux.com',
+  },
 } as const;
 
 export type NetworkKey = keyof typeof NETWORKS;

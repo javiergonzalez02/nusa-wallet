@@ -207,19 +207,8 @@ async function refreshForNetwork() {
           accountBalance.value = formatEther(wei);
         }
     );
-    // Restart ERC-20 balance watcher
-    stopTokenWatch?.();
-    const imported = await getImportedTokens();
-    stopTokenWatch = await watchTokenBalances(
-        accountAddress.value,
-        imported,
-        (balances) => {
-          tokens.value = tokens.value.map(t => ({
-            ...t,
-            balance: balances[t.address] ?? t.balance
-          }));
-        }
-    );
+    // Restart ERC-20s balance watcher
+    await restartTokensWatcher();
     // Resume pending tx watchers
     await resumeTxWatchers();
   } catch (err) {
@@ -228,6 +217,24 @@ async function refreshForNetwork() {
     accountAddress.value = 'Error';
     accountBalance.value = 'Error';
   }
+}
+
+/**
+ * Restart tokens balance watcher
+ */
+async function restartTokensWatcher() {
+  stopTokenWatch?.();
+  const imported = await getImportedTokens();
+  stopTokenWatch = await watchTokenBalances(
+      accountAddress.value,
+      imported,
+      (balances) => {
+        tokens.value = tokens.value.map(t => ({
+          ...t,
+          balance: balances[t.address] ?? t.balance
+        }));
+      }
+  );
 }
 
 /**
@@ -260,9 +267,9 @@ async function loadTokens() {
 
   // 2. Fetch balances in parallel
   const balances = await Promise.all(
-    imported.map(t =>
-      fetchTokenBalance(t.address, accountAddress.value, provider.value, t.decimals)
-    )
+      imported.map(t =>
+          fetchTokenBalance(t.address, accountAddress.value, provider.value, t.decimals)
+      )
   )
 
   // 3. Build & assign a fresh array of { address, symbol, name, decimals, balance }
@@ -270,6 +277,9 @@ async function loadTokens() {
     ...t,
     balance: balances[i]
   }))
+
+  // 4. Restart ERC-20s balance watcher
+  await restartTokensWatcher();
 }
 
 /**

@@ -191,7 +191,7 @@ async function refreshForNetwork() {
     // Ensure mnemonic is available
     if (!mnemonic) throw new Error('Seed phrase missing');
     // Fetch account balance
-    const balance = await getBalanceForAddress(mnemonic, provider.value);
+    const balance = await getBalanceForAddress(accountAddress.value, provider.value);
     accountBalance.value = balance ?? '0';
     // Update global account store
     useAccountStore().setAccount(accountAddress.value);

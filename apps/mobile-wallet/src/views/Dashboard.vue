@@ -167,6 +167,8 @@ onMounted(async() => {
   accountAddress.value = getAddressFromMnemonic(mnemonic);
   // Wait for network store to be ready before loading data
   await waitForNetworkReady();
+  // Load info related to network
+  await refreshForNetwork();
   // Load persisted tx history
   await initTxHistory();
   // Watch for network changes in tx history

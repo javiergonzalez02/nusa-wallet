@@ -107,9 +107,14 @@ export const useNetworkStore = defineStore('networks', () => {
 	}
 
 	// Set or clear an override for a network
-	function setOverride(k: NetworkKey, p: Partial<NetworkInfo>) {
-		if (Object.keys(p).length === 0) delete state.overrides[k];
-		else state.overrides[k] = { ...state.overrides[k], ...p };
+	function setOverride(k: NetworkKey, patch: Partial<NetworkInfo>) {
+		// Strip empty / null values
+		const clean = Object.fromEntries(
+				Object.entries(patch).filter(([, v]) => v !== '' && v != null)
+		);
+		// Merge or delete overrides
+		if (Object.keys(clean).length === 0) delete state.overrides[k];
+		else state.overrides[k] = { ...state.overrides[k], ...clean };
 	}
 
 	return {

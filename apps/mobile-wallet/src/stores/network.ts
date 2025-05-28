@@ -101,9 +101,10 @@ export const useNetworkStore = defineStore('networks', () => {
 		Object.assign(state.custom[k], p);
 	}
 
-	// Remove a custom network
+	// Remove a custom network and select default network
 	function removeCustom(k: string) {
 		delete state.custom[k];
+		select(DEFAULT_STATE.selected);
 	}
 
 	// Set or clear an override for a network

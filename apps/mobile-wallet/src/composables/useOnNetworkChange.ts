@@ -21,7 +21,7 @@ export function useOnNetworkChange(
 	const run = () => effect(net.provider, net.selectedInfo);
 
 	// 1) One-time watcher: immediately call the callback with the current `net.ready` value (to catch an already-ready store),
-  //    then automatically unsubscribe as soon as `net.ready` becomes true
+	//    then automatically unsubscribe as soon as `net.ready` becomes true
 	const stopReady = watch(
 			() => net.ready,            // watch the store’s `ready` boolean
 			(isReady) => {  // isReady: the current value of `net.ready`
@@ -32,11 +32,14 @@ export function useOnNetworkChange(
 			{ immediate: true },       // trigger callback right away to handle an already-ready state
 	);
 
-	// 2) Main watcher: observe changes to the NetworkInfo object,
-	// and run effect each time the user switches networks or modifies any network details
+	// 2) Main watcher:
+	//    – Fires whenever EITHER the selected network object changes (or any nested field)
+	//      OR the JsonRpcProvider instance is replaced.
+	//    – Covers: chain switches, edits to network metadata, or reconnecting to a brand-new provider.
+	//    – On every such change we invoke `effect(provider, selectedInfo)`.
 	return watch(
-			() => net.selectedInfo,     // watch the entire selectedInfo object
-			run,                           // invoke effect on every change
+			() => [net.selectedInfo, net.provider],  // track both reactive sources
+			run,                                     // call effect on every change
 			{ deep: true }
 	);
 }
